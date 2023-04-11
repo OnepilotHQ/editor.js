@@ -382,6 +382,12 @@ export default class BlockEvents extends Module {
    * @param {KeyboardEvent} event - keyboard event
    */
   private arrowRightAndDown(event: KeyboardEvent): void {
+    const isMetaCombination = event.metaKey || event.ctrlKey;
+
+    if (isMetaCombination) {
+      return;
+    }
+
     const isFlipperCombination = Flipper.usedKeys.includes(event.keyCode) &&
       (!event.shiftKey || event.keyCode === _.keyCodes.TAB);
 
@@ -440,6 +446,12 @@ export default class BlockEvents extends Module {
    * @param {KeyboardEvent} event - keyboard event
    */
   private arrowLeftAndUp(event: KeyboardEvent): void {
+    const isMetaCombination = event.metaKey || event.ctrlKey;
+
+    if (isMetaCombination) {
+      return;
+    }
+
     /**
      * Arrows might be handled on toolbars by flipper
      * Check for Flipper.usedKeys to allow navigate by UP and disallow by LEFT
