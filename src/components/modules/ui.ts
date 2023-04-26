@@ -782,7 +782,7 @@ export default class UI extends Module<UINodes> {
        *   to prevent unnecessary tree-walking on Tools with many nodes (for ex. Table)
        * - Or, default-block is not empty
        */
-      if (!BlockManager.lastBlock.tool.isDefault || !BlockManager.lastBlock.isEmpty) {
+      if ((!BlockManager.lastBlock.tool.isDefault || !BlockManager.lastBlock.isEmpty) && BlockManager.lastBlock.name !== 'case') {
         BlockManager.insertAtEnd();
       }
 

@@ -334,7 +334,7 @@ export default class Caret extends Module {
      */
     if (lastBlock.tool.isDefault && lastBlock.isEmpty) {
       this.setToBlock(lastBlock);
-    } else {
+    } else if (lastBlock.name !== 'case') {
       const newBlock = this.Editor.BlockManager.insertAtEnd();
 
       this.setToBlock(newBlock);
