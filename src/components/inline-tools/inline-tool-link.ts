@@ -43,7 +43,7 @@ export default class LinkInlineTool implements InlineTool {
   /**
    * Native Document's commands for link/unlink
    */
-  private readonly commandLink: string = 'createLink';
+  private readonly commandLink: string = 'insertHTML';
   private readonly commandUnlink: string = 'unlink';
 
   /**
@@ -394,7 +394,10 @@ export default class LinkInlineTool implements InlineTool {
       this.selection.expandToTag(anchorTag);
     }
 
-    document.execCommand(this.commandLink, false, link);
+    const content = window.document.getSelection().toString();
+    const htmlLink = `<a href="${link}" target="_blank">${content}</a>`;
+
+    document.execCommand(this.commandLink, false, htmlLink);
   }
 
   /**
