@@ -282,7 +282,9 @@ export default class BlockEvents extends Module {
 
       const index = BlockManager.currentBlockIndex;
 
-      if (BlockManager.previousBlock && BlockManager.previousBlock.inputs.length === 0) {
+      if (BlockManager.previousBlock &&
+        BlockManager.previousBlock.tool.name !== 'case' &&
+        BlockManager.previousBlock.inputs.length === 0) {
         /** If previous block doesn't contain inputs, remove it */
         BlockManager.removeBlock(index - 1);
       } else {
@@ -424,7 +426,7 @@ export default class BlockEvents extends Module {
         if (this.Editor.BlockManager.currentBlock) {
           this.Editor.BlockManager.currentBlock.updateCurrentInput();
         }
-      // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
       }, 20)();
     }
 
@@ -483,7 +485,7 @@ export default class BlockEvents extends Module {
         if (this.Editor.BlockManager.currentBlock) {
           this.Editor.BlockManager.currentBlock.updateCurrentInput();
         }
-      // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
       }, 20)();
     }
 
@@ -500,10 +502,10 @@ export default class BlockEvents extends Module {
    */
   private needToolbarClosing(event: KeyboardEvent): boolean {
     const toolboxItemSelected = (event.keyCode === _.keyCodes.ENTER && this.Editor.Toolbar.toolbox.opened),
-        blockSettingsItemSelected = (event.keyCode === _.keyCodes.ENTER && this.Editor.BlockSettings.opened),
-        inlineToolbarItemSelected = (event.keyCode === _.keyCodes.ENTER && this.Editor.InlineToolbar.opened),
-        conversionToolbarItemSelected = (event.keyCode === _.keyCodes.ENTER && this.Editor.ConversionToolbar.opened),
-        flippingToolbarItems = event.keyCode === _.keyCodes.TAB;
+      blockSettingsItemSelected = (event.keyCode === _.keyCodes.ENTER && this.Editor.BlockSettings.opened),
+      inlineToolbarItemSelected = (event.keyCode === _.keyCodes.ENTER && this.Editor.InlineToolbar.opened),
+      conversionToolbarItemSelected = (event.keyCode === _.keyCodes.ENTER && this.Editor.ConversionToolbar.opened),
+      flippingToolbarItems = event.keyCode === _.keyCodes.TAB;
 
     /**
      * Do not close Toolbar in cases:
