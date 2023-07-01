@@ -217,6 +217,17 @@ export default class BlockEvents extends Module {
     const currentBlock = BlockManager.currentBlock;
 
     /**
+     * Don't handle Enter if the Emoji menu is open
+     */
+    const isEmojiOpened = document.querySelector('.op-emoji-container[data-show]');
+
+    if (isEmojiOpened !== null) {
+      event.preventDefault();
+
+      return;
+    }
+
+    /**
      * Don't handle Enter keydowns when Tool sets enableLineBreaks to true.
      * Uses for Tools like <code> where line breaks should be handled by default behaviour.
      */
@@ -246,13 +257,6 @@ export default class BlockEvents extends Module {
      */
     if (this.Editor.Caret.isAtStart && !this.Editor.BlockManager.currentBlock.hasMedia) {
       this.Editor.BlockManager.insertDefaultBlockAtIndex(this.Editor.BlockManager.currentBlockIndex);
-
-    /**
-     * If caret is at very end of the block, just append the new block without splitting
-     * to prevent unnecessary dom mutation observing
-     */
-    } else if (this.Editor.Caret.isAtEnd) {
-      newCurrent = this.Editor.BlockManager.insertDefaultBlockAtIndex(this.Editor.BlockManager.currentBlockIndex + 1);
     } else {
       /**
        * Split the Current Block into two blocks
@@ -521,10 +525,10 @@ export default class BlockEvents extends Module {
    */
   private needToolbarClosing(event: KeyboardEvent): boolean {
     const toolboxItemSelected = (event.keyCode === _.keyCodes.ENTER && this.Editor.Toolbar.toolbox.opened),
-      blockSettingsItemSelected = (event.keyCode === _.keyCodes.ENTER && this.Editor.BlockSettings.opened),
-      inlineToolbarItemSelected = (event.keyCode === _.keyCodes.ENTER && this.Editor.InlineToolbar.opened),
-      conversionToolbarItemSelected = (event.keyCode === _.keyCodes.ENTER && this.Editor.ConversionToolbar.opened),
-      flippingToolbarItems = event.keyCode === _.keyCodes.TAB;
+        blockSettingsItemSelected = (event.keyCode === _.keyCodes.ENTER && this.Editor.BlockSettings.opened),
+        inlineToolbarItemSelected = (event.keyCode === _.keyCodes.ENTER && this.Editor.InlineToolbar.opened),
+        conversionToolbarItemSelected = (event.keyCode === _.keyCodes.ENTER && this.Editor.ConversionToolbar.opened),
+        flippingToolbarItems = event.keyCode === _.keyCodes.TAB;
 
     /**
      * Do not close Toolbar in cases:
