@@ -186,7 +186,6 @@ export default class BlockEvents extends Module {
    * @param {ClipboardEvent} event - clipboard event
    */
   public handleCommandX(event: ClipboardEvent): void {
-
     const { BlockSelection, BlockManager, Caret } = this.Editor;
 
     // if (!BlockSelection.anyBlockSelected) {
@@ -220,9 +219,9 @@ export default class BlockEvents extends Module {
     /**
      * Don't handle Enter if the Emoji menu is open
      */
-    const isEmojiOpened = document.querySelector('.op-emoji-container[data-show]');
+    const isMenuOpened = document.querySelector('.op-menu-container[data-show]');
 
-    if (isEmojiOpened !== null) {
+    if (isMenuOpened !== null) {
       event.preventDefault();
 
       return;
@@ -402,6 +401,14 @@ export default class BlockEvents extends Module {
       return;
     }
 
+    const isMenuOpened = document.querySelector('.op-menu-container[data-show]');
+
+    if (isMenuOpened !== null && event.keyCode === _.keyCodes.DOWN) {
+      event.preventDefault();
+
+      return;
+    }
+
     const isFlipperCombination = Flipper.usedKeys.includes(event.keyCode) &&
       (!event.shiftKey || event.keyCode === _.keyCodes.TAB);
 
@@ -463,6 +470,14 @@ export default class BlockEvents extends Module {
     const isMetaCombination = event.metaKey || event.ctrlKey;
 
     if (isMetaCombination) {
+      return;
+    }
+
+    const isMenuOpened = document.querySelector('.op-menu-container[data-show]');
+
+    if (isMenuOpened !== null && event.keyCode === _.keyCodes.UP) {
+      event.preventDefault();
+
       return;
     }
 

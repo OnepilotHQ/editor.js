@@ -345,11 +345,7 @@ export default class Toolbox extends EventsDispatcher<ToolboxEventMap> {
      * On mobile version, we see the Plus Button even near non-empty blocks,
      * so if current block is not empty, add the new block below the current
      */
-    const isTriggeredByCMD = currentBlock.holder.innerText === '/';
-
-    const shouldReplace = currentBlock.isEmpty || isTriggeredByCMD;
-
-    const index = shouldReplace ? currentBlockIndex : currentBlockIndex + 1;
+    const index = currentBlock.isEmpty ? currentBlockIndex : currentBlockIndex + 1;
 
     let blockData;
 
@@ -367,8 +363,8 @@ export default class Toolbox extends EventsDispatcher<ToolboxEventMap> {
       blockData,
       undefined,
       index,
-      isTriggeredByCMD,
-      shouldReplace
+      undefined,
+      currentBlock.isEmpty
     );
 
 
