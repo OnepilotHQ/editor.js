@@ -498,9 +498,22 @@ export default class UI extends Module<UINodes> {
      * remove selected blocks
      */
     if (BlockSelection.anyBlockSelected && !Selection.isSelectionExists) {
+      const isCaseSelected = BlockManager.isCaseSelected();
+
       const selectionPositionIndex = BlockManager.removeSelectedBlocks();
 
-      Caret.setToBlock(BlockManager.insertDefaultBlockAtIndex(selectionPositionIndex, true), Caret.positions.START);
+      console.log(!isCaseSelected);
+      if (isCaseSelected) {
+        console.log(BlockManager.findLastBlockBeforeCase());
+        const block = BlockManager.findLastBlockBeforeCase() ??
+          BlockManager.insertDefaultBlockAtIndex(0, true);
+
+        Caret.setToBlock(block, Caret.positions.END);
+      }
+
+      if (!isCaseSelected) {
+        Caret.setToBlock(BlockManager.insertDefaultBlockAtIndex(selectionPositionIndex, true), Caret.positions.START);
+      }
 
       /** Clear selection */
       BlockSelection.clearSelection(event);

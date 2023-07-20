@@ -500,6 +500,22 @@ export default class BlockManager extends Module {
     return firstSelectedBlockIndex;
   }
 
+  public isCaseSelected(): boolean {
+    return this.blocks.some(b => {
+      return b.selected && b.tool.name === 'case';
+    });
+  }
+
+  public findLastBlockBeforeCase(): Block | undefined
+  {
+    for (let index = this.blocks.length - 1; index >= 0; index--) {
+      if (this.blocks[index].tool.name !== 'case') {
+        return this.blocks[index];
+      }
+    }
+
+    return undefined;
+  }
   /**
    * Attention!
    * After removing insert the new default typed Block and focus on it
