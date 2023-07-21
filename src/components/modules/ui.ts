@@ -502,9 +502,7 @@ export default class UI extends Module<UINodes> {
 
       const selectionPositionIndex = BlockManager.removeSelectedBlocks();
 
-      console.log(!isCaseSelected);
       if (isCaseSelected) {
-        console.log(BlockManager.findLastBlockBeforeCase());
         const block = BlockManager.findLastBlockBeforeCase() ??
           BlockManager.insertDefaultBlockAtIndex(0, true);
 
