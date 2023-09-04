@@ -297,15 +297,15 @@ export default class BlockEvents extends Module {
       return;
     }
 
-      if (BlockManager.previousBlock &&
+    if (BlockManager.previousBlock &&
         BlockManager.previousBlock.tool.name !== 'case' &&
         BlockManager.previousBlock.inputs.length === 0) {
-        /** If previous block doesn't contain inputs, remove it */
-        BlockManager.removeBlock(index - 1);
-      } else {
-        /** If block is empty, just remove it */
-        BlockManager.removeBlock();
-      }
+      /** If previous block doesn't contain inputs, remove it */
+      BlockManager.removeBlock(previousBlock);
+    } else {
+      /** If block is empty, just remove it */
+      BlockManager.removeBlock(currentBlock);
+    }
 
     /**
      * If caret is not at the start, leave native behaviour
@@ -318,7 +318,7 @@ export default class BlockEvents extends Module {
      */
     event.preventDefault();
     this.Editor.Toolbar.close();
-    
+
     const isFirstInputFocused = currentBlock.currentInput === currentBlock.firstInput;
 
     /**
