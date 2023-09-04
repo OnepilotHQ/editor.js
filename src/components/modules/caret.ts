@@ -505,13 +505,10 @@ export default class Caret extends Module {
 
     sel.expandToTag(shadowCaret as HTMLElement);
 
-    setTimeout(() => {
-      const newRange = document.createRange();
+    const newRange = document.createRange();
 
-      newRange.selectNode(shadowCaret);
-      newRange.extractContents();
-    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-    }, 50);
+    newRange.selectNode(shadowCaret);
+    newRange.extractContents();
   }
 
   /**
@@ -536,7 +533,7 @@ export default class Caret extends Module {
       fragment.appendChild(new Text());
     }
 
-    const lastChild = fragment.lastChild;
+    const lastChild = fragment.lastChild as ChildNode;
 
     range.deleteContents();
     range.insertNode(fragment);
@@ -544,7 +541,11 @@ export default class Caret extends Module {
     /** Cross-browser caret insertion */
     const newRange = document.createRange();
 
-    newRange.setStart(lastChild, lastChild.textContent.length);
+    const nodeToSetCaret = lastChild.nodeType === Node.TEXT_NODE ? lastChild : lastChild.firstChild;
+
+    if (nodeToSetCaret !== null && nodeToSetCaret.textContent !== null) {
+      newRange.setStart(nodeToSetCaret, nodeToSetCaret.textContent.length);
+    }
 
     selection.removeAllRanges();
     selection.addRange(newRange);

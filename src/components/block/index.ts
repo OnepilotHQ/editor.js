@@ -25,6 +25,7 @@ import { TunesMenuConfigItem } from '../../../types/tools';
 import { isMutationBelongsToElement } from '../utils/mutations';
 import { EditorEventMap, FakeCursorAboutToBeToggled, FakeCursorHaveBeenSet, RedactorDomChanged } from '../events';
 import { RedactorDomChangedPayload } from '../events/RedactorDomChanged';
+import { convertBlockDataToString } from '../utils/blocks';
 
 /**
  * Interface describes Block class constructor argument
@@ -251,15 +252,20 @@ export default class Block extends EventsDispatcher<BlockEvents> {
     this.holder = this.compose();
 
     /**
-     * Start watching block mutations
+     * Bind block events in RIC for optimizing of constructing process time
      */
-    this.watchBlockMutations();
+    window.requestIdleCallback(() => {
+      /**
+       * Start watching block mutations
+       */
+      this.watchBlockMutations();
 
-    /**
-     * Mutation observer doesn't track changes in "<input>" and "<textarea>"
-     * so we need to track focus events to update current input and clear cache.
-     */
-    this.addInputEvents();
+      /**
+       * Mutation observer doesn't track changes in "<input>" and "<textarea>"
+       * so we need to track focus events to update current input and clear cache.
+       */
+      this.addInputEvents();
+    });
   }
 
   /**
@@ -724,6 +730,15 @@ export default class Block extends EventsDispatcher<BlockEvents> {
   }
 
   /**
+   * Exports Block data as string using conversion config
+   */
+  public async exportDataAsString(): Promise<string> {
+    const blockData = await this.data;
+
+    return convertBlockDataToString(blockData, this.tool.conversionConfig);
+  }
+
+  /**
    * Make default Block wrappers and put Tool`s content there
    *
    * @returns {HTMLDivElement}
@@ -732,6 +747,12 @@ export default class Block extends EventsDispatcher<BlockEvents> {
     const wrapper = $.make('div', Block.CSS.wrapper) as HTMLDivElement,
         contentNode = $.make('div', Block.CSS.content),
         pluginsContent = this.toolInstance.render();
+
+    /**
+     * Export id to the DOM three
+     * Useful for standalone modules development. For example, allows to identify Block by some child node. Or scroll to a particular Block by id.
+     */
+    wrapper.dataset.id = this.id;
 
     /**
      * Saving a reference to plugin's content element for guaranteed accessing it later

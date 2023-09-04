@@ -39,7 +39,8 @@ export default class Core {
     /**
      * Ready promise. Resolved if Editor.js is ready to work, rejected otherwise
      */
-    let onReady, onFail;
+    let onReady: (value?: void | PromiseLike<void>) => void;
+    let onFail: (reason?: unknown) => void;
 
     this.isReady = new Promise((resolve, reject) => {
       onReady = resolve;
@@ -50,18 +51,17 @@ export default class Core {
       .then(async () => {
         this.configuration = config;
 
-        await this.validate();
-        await this.init();
+        this.validate();
+        this.init();
         await this.start();
+        await this.render();
 
-        _.logLabeled('I\'m ready! (ﾉ◕ヮ◕)ﾉ*:･ﾟ✧', 'log', '', 'color: #E24A75');
+        const { BlockManager, Caret, UI, ModificationsObserver } = this.moduleInstances;
 
-        setTimeout(async () => {
-          await this.render();
+        UI.checkEmptiness();
+        ModificationsObserver.enable();
 
           if ((this.configuration as EditorConfig).autofocus) {
-            const { BlockManager, Caret } = this.moduleInstances;
-
             Caret.setToBlock(BlockManager.blocks[0], Caret.positions.END);
             BlockManager.highlightCurrentNode();
           }
@@ -71,12 +71,7 @@ export default class Core {
            */
           this.moduleInstances.UI.removeLoader();
 
-          /**
-           * Resolve this.isReady promise
-           */
-          onReady();
-        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-        }, 500);
+        onReady();
       })
       .catch((error) => {
         _.log(`Editor.js is not ready because of ${error}`, 'error');
@@ -210,10 +205,8 @@ export default class Core {
 
   /**
    * Checks for required fields in Editor's config
-   *
-   * @returns {Promise<void>}
    */
-  public async validate(): Promise<void> {
+  public validate(): void {
     const { holderId, holder } = this.config;
 
     if (holderId && holder) {
