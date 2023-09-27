@@ -61,15 +61,10 @@ export default class Core {
         UI.checkEmptiness();
         ModificationsObserver.enable();
 
-          if ((this.configuration as EditorConfig).autofocus) {
-            Caret.setToBlock(BlockManager.blocks[0], Caret.positions.END);
-            BlockManager.highlightCurrentNode();
-          }
-
-          /**
-           * Remove loader, show content
-           */
-          this.moduleInstances.UI.removeLoader();
+        if ((this.configuration as EditorConfig).autofocus) {
+          Caret.setToBlock(BlockManager.blocks[0], Caret.positions.END);
+          BlockManager.highlightCurrentNode();
+        }
 
         onReady();
       })
