@@ -3,7 +3,7 @@ import $ from '../../dom';
 import * as _ from '../../utils';
 import I18n from '../../i18n';
 import { I18nInternalNS } from '../../i18n/namespace-internal';
-import Tooltip from '../../utils/tooltip';
+import * as tooltip from '../../utils/tooltip';
 import { ModuleConfig } from '../../../types-internal/module-config';
 import Block from '../../block';
 import Toolbox, { ToolboxEvent } from '../../ui/toolbox';
@@ -32,12 +32,12 @@ import { BlockHovered } from '../../events/BlockHovered';
  * HTML Elements used for Toolbar UI
  */
 interface ToolbarNodes {
-  wrapper: HTMLElement;
-  content: HTMLElement;
-  actions: HTMLElement;
+  wrapper: HTMLElement | undefined;
+  content: HTMLElement | undefined;
+  actions: HTMLElement | undefined;
 
-  plusButton: HTMLElement;
-  settingsToggler: HTMLElement;
+  plusButton: HTMLElement | undefined;
+  settingsToggler: HTMLElement | undefined;
 }
 /**
  *
@@ -92,11 +92,6 @@ interface ToolbarNodes {
  */
 export default class Toolbar extends Module<ToolbarNodes> {
   /**
-   * Tooltip utility Instance
-   */
-  private tooltip: Tooltip;
-
-  /**
    * Block near which we display the Toolbox
    */
   private hoveredBlock: Block;
@@ -118,7 +113,6 @@ export default class Toolbar extends Module<ToolbarNodes> {
       config,
       eventsDispatcher,
     });
-    this.tooltip = new Tooltip();
   }
 
   /**
@@ -324,12 +318,20 @@ export default class Toolbar extends Module<ToolbarNodes> {
       return;
     }
 
-    this.nodes.wrapper.classList.remove(this.CSS.toolbarOpened);
+    this.nodes.wrapper?.classList.remove(this.CSS.toolbarOpened);
 
     /** Close components */
     this.blockActions.hide();
     this.toolboxInstance?.close();
     this.Editor.BlockSettings.close();
+    this.reset();
+  }
+
+  /**
+   * Reset the Toolbar position to prevent DOM height growth, for example after blocks deletion
+   */
+  private reset(): void {
+    this.nodes.wrapper.style.top = 'unset';
   }
 
   /**
@@ -339,16 +341,13 @@ export default class Toolbar extends Module<ToolbarNodes> {
    *                                     This flag allows to open Toolbar without Actions.
    */
   private open(withBlockActions = true): void {
-    _.delay(() => {
-      this.nodes.wrapper.classList.add(this.CSS.toolbarOpened);
+    this.nodes.wrapper.classList.add(this.CSS.toolbarOpened);
 
-      if (withBlockActions) {
-        this.blockActions.show();
-      } else {
-        this.blockActions.hide();
-      }
-    // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-    }, 50)();
+    if (withBlockActions) {
+      this.blockActions.show();
+    } else {
+      this.blockActions.hide();
+    }
   }
 
   /**
@@ -384,7 +383,7 @@ export default class Toolbar extends Module<ToolbarNodes> {
     $.append(this.nodes.actions, this.nodes.plusButton);
 
     this.readOnlyMutableListeners.on(this.nodes.plusButton, 'click', () => {
-      this.tooltip.hide(true);
+      tooltip.hide(true);
       this.plusButtonClicked();
     }, false);
 
@@ -398,7 +397,7 @@ export default class Toolbar extends Module<ToolbarNodes> {
       textContent: '⇥ Tab',
     }));
 
-    this.tooltip.onHover(this.nodes.plusButton, tooltipContent, {
+    tooltip.onHover(this.nodes.plusButton, tooltipContent, {
       hidingDelay: 400,
     });
 
@@ -414,7 +413,7 @@ export default class Toolbar extends Module<ToolbarNodes> {
 
     $.append(this.nodes.actions, this.nodes.settingsToggler);
 
-    this.tooltip.onHover(
+    tooltip.onHover(
       this.nodes.settingsToggler,
       I18n.ui(I18nInternalNS.ui.blockTunes.toggler, 'Click to tune'),
       {
@@ -514,7 +513,7 @@ export default class Toolbar extends Module<ToolbarNodes> {
         this.toolboxInstance.close();
       }
 
-      this.tooltip.hide(true);
+      tooltip.hide(true);
     }, true);
 
     /**
@@ -595,6 +594,5 @@ export default class Toolbar extends Module<ToolbarNodes> {
     if (this.toolboxInstance) {
       this.toolboxInstance.destroy();
     }
-    this.tooltip.destroy();
   }
 }
