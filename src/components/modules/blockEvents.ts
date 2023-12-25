@@ -52,13 +52,13 @@ export default class BlockEvents extends Module {
       case _.keyCodes.TAB:
         this.tabPressed(event);
         break;
-      case _.keyCodes.SLASH:
-        if (event.ctrlKey || event.metaKey) {
-          this.commandSlashPressed();
-        } else {
-          this.slashPressed();
-        }
-        break;
+      // case _.keyCodes.SLASH:
+      // if (event.ctrlKey || event.metaKey) {
+      //   this.commandSlashPressed();
+      // } else {
+      //   this.slashPressed();
+      // }
+      // break;
     }
   }
 
