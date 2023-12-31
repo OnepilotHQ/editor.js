@@ -21,6 +21,7 @@ import { BlockChanged } from '../events';
 import { clean } from '../utils/sanitizer';
 import { convertStringToBlockData } from '../utils/blocks';
 import PromiseQueue from '../utils/promise-queue';
+import { isString } from '../utils';
 
 /**
  * @typedef {BlockManager} BlockManager
@@ -471,10 +472,27 @@ export default class BlockManager extends Module {
    * @returns {Promise} - the sequence that can be continued
    */
   public async mergeBlocks(targetBlock: Block, blockToMerge: Block): Promise<void> {
-    const blockToMergeData = await blockToMerge.data;
+    const data = await blockToMerge.data;
+
+    const getBlockToolData = async (): Promise<BlockToolData> => {
+      const importConfig = targetBlock.tool.conversionConfig.import;
+      const exportConfig = blockToMerge.tool.conversionConfig.export;
+
+      if (isString(importConfig)) {
+        return {
+          [importConfig]: isString(exportConfig) ? data[exportConfig] : exportConfig(data),
+        };
+      }
+
+      return importConfig(await blockToMerge.exportDataAsString());
+    };
+
+    const blockToMergeData = targetBlock.name !== blockToMerge.name
+      ? await getBlockToolData()
+      : data;
 
     if (!_.isEmpty(blockToMergeData)) {
-      await targetBlock.mergeWith(blockToMergeData);
+      await targetBlock.mergeWith(blockToMergeData, targetBlock.name);
     }
 
     this.removeBlock(blockToMerge);
