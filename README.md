@@ -103,9 +103,9 @@ See details about [Installation](https://editorjs.io/getting-started/) and [Conf
 
 Call `editor.save()` and handle returned Promise with saved data.
 
-```javascript
+````javascript
 const data = await editor.save()
-```
+````
 
 ### Example
 
@@ -239,3 +239,28 @@ CodeX is a team of digital specialists around the world interested in building h
 | 🌐 | Join  👋  | Twitter | Instagram |
 | -- | -- | -- | -- |
 | [codex.so](https://codex.so) | [codex.so/join](https://codex.so/join) |[@codex_team](http://twitter.com/codex_team) | [@codex_team](http://instagram.com/codex_team/) |
+
+
+# Onepilot
+
+## Code Edition
+
+Sometimes, for our need we will need to edit, the code of the editor. When it happen, open a pull request from the branch `feature/onepilot-specific-code`, make your modification and add reviewers on the PR freshly openned.
+
+__⚠️ Don't forget to increment the version on the package.json__
+
+## Publish the package on NPM
+
+Once your PR has been reviewed, approved & merged, you'll need to publish on NPM the new version of the project, to achieve this, run the commands below:
+
+__Build the project__
+````
+yarn build
+````
+
+__Publish on NPM__
+````
+npm publish --access public
+````
+
+__⚠️ Don\'t forget to update the version in the onepilot app__
