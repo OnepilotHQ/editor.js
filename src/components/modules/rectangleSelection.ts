@@ -182,8 +182,6 @@ export default class RectangleSelection extends Module {
     const { container } = this.genHTML();
     const { UI } = this.Editor;
 
-    console.log(UI.nodes.holder);
-
     this.listeners.on(container, 'mousedown', (mouseEvent: MouseEvent) => {
       this.processMouseDown(mouseEvent);
     }, false);
@@ -403,9 +401,7 @@ export default class RectangleSelection extends Module {
    * Select or unselect all of blocks in array if rect is out or in selectable area
    */
   private inverseSelection(): void {
-    const firstBlockInStack = this.Editor.BlockManager.getBlockByIndex(
-      this.stackOfSelected[0]
-    );
+    const firstBlockInStack = this.Editor.BlockManager.getBlockByIndex(this.stackOfSelected[0]);
     const isSelectedMode = firstBlockInStack.selected;
 
     if (this.rectCrossesBlocks && !isSelectedMode) {
@@ -515,7 +511,7 @@ export default class RectangleSelection extends Module {
 
     // When the selection is too fast, some blocks do not have time to be noticed. Fix it.
     if (!reduction && (index > this.stackOfSelected[sizeStack - 1] ||
-        this.stackOfSelected[sizeStack - 1] === undefined)) {
+      this.stackOfSelected[sizeStack - 1] === undefined)) {
       let ind = this.stackOfSelected[sizeStack - 1] + 1 || index;
 
       for (ind; ind <= index; ind++) {
