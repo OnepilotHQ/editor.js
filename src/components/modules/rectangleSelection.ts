@@ -45,7 +45,7 @@ export default class RectangleSelection extends Module {
   /**
    *  Height of scroll zone on boundary of screen
    */
-  private readonly HEIGHT_OF_SCROLL_ZONE = 40;
+  private readonly HEIGHT_OF_SCROLL_ZONE = 80;
 
   /**
    *  Scroll zone type indicators
@@ -180,23 +180,24 @@ export default class RectangleSelection extends Module {
    */
   private enableModuleBindings(): void {
     const { container } = this.genHTML();
+    const { UI } = this.Editor;
 
     this.listeners.on(container, 'mousedown', (mouseEvent: MouseEvent) => {
       this.processMouseDown(mouseEvent);
     }, false);
 
-    this.listeners.on(document.body, 'mousemove', _.throttle((mouseEvent: MouseEvent) => {
+    this.listeners.on(UI.nodes.holder, 'mousemove', _.throttle((mouseEvent: MouseEvent) => {
       this.processMouseMove(mouseEvent);
     // eslint-disable-next-line @typescript-eslint/no-magic-numbers
     }, 10), {
       passive: true,
     });
 
-    this.listeners.on(document.body, 'mouseleave', () => {
+    this.listeners.on(UI.nodes.holder, 'mouseleave', () => {
       this.processMouseLeave();
     });
 
-    this.listeners.on(window, 'scroll', _.throttle((mouseEvent: MouseEvent) => {
+    this.listeners.on(UI.nodes.holder, 'scroll', _.throttle((mouseEvent: MouseEvent) => {
       this.processScroll(mouseEvent);
     // eslint-disable-next-line @typescript-eslint/no-magic-numbers
     }, 10), {
@@ -268,8 +269,14 @@ export default class RectangleSelection extends Module {
    * @param {number} clientY - Y coord of mouse
    */
   private scrollByZones(clientY): void {
+    const { UI } = this.Editor;
+
     this.inScrollZone = null;
-    if (clientY <= this.HEIGHT_OF_SCROLL_ZONE) {
+
+    const rect = UI.nodes.holder.getBoundingClientRect();
+    const clientYFromTopOfEditor = clientY - rect.top; 
+
+    if (clientYFromTopOfEditor <= this.HEIGHT_OF_SCROLL_ZONE) {
       this.inScrollZone = this.TOP_SCROLL_ZONE;
     }
     if (document.documentElement.clientHeight - clientY <= this.HEIGHT_OF_SCROLL_ZONE) {
@@ -322,9 +329,10 @@ export default class RectangleSelection extends Module {
     if (!(this.inScrollZone && this.mousedown)) {
       return;
     }
+    const { UI } = this.Editor;
     const lastOffset = window.pageYOffset;
 
-    window.scrollBy(0, speed);
+    UI.nodes.holder.scrollBy(0, speed);
     this.mouseY += window.pageYOffset - lastOffset;
     setTimeout(() => {
       this.scrollVertical(speed);
@@ -438,7 +446,9 @@ export default class RectangleSelection extends Module {
    * @returns {object} index - index next Block, leftPos - start of left border of Block, rightPos - right border
    */
   private genInfoForMouseSelection(): {index: number; leftPos: number; rightPos: number} {
-    const widthOfRedactor = document.body.offsetWidth;
+    const { UI } = this.Editor;
+
+    const widthOfRedactor = UI.nodes.holder.offsetWidth;
     const centerOfRedactor = widthOfRedactor / 2;
     const Y = this.mouseY - window.pageYOffset;
     const elementUnderMouse = document.elementFromPoint(centerOfRedactor, Y);
