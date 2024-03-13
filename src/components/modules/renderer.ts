@@ -67,7 +67,7 @@ export default class Renderer extends Module {
         /**
          * Insert batch of Blocks
          */
-        BlockManager.insertMany(blocks);
+        BlockManager.insertMany(blocks, 0, true);
       }
 
       /**

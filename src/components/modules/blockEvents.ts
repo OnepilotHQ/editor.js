@@ -8,6 +8,74 @@ import Flipper from '../flipper';
 import type Block from '../block';
 import { areBlocksMergeable } from '../utils/blocks';
 
+
+const getSelection = (element: any) => {
+  let selectionStart;
+  let selectionEnd;
+  const isSupported = typeof window.getSelection !== 'undefined';
+
+  if (isSupported) {
+    const range = window.getSelection()?.getRangeAt(0);
+
+    if (range) {
+      const preSelectionRange = range.cloneRange();
+
+      preSelectionRange.selectNodeContents(element);
+      preSelectionRange.setEnd(range.startContainer, range.startOffset);
+      selectionStart = preSelectionRange.toString().length;
+      selectionEnd = selectionStart + range.toString().length;
+    }
+  }
+
+  return { selectionStart,
+    selectionEnd };
+};
+
+export const getCaretLineCharIndexesInElem = (elem: Element) => {
+  const { selectionStart } = getSelection(elem);
+
+  if (selectionStart) {
+    const contentText = elem.textContent;
+
+    if (contentText) {
+      const totalChars = contentText.length;
+      const lines = contentText.split('\n');
+      const totalLines = lines.length;
+      const lineIndex =
+        contentText.substr(0, selectionStart).split('\n').length - 1;
+      const charIndex = lines.reduce(
+        (prev: number, curr: string, index: number) => {
+          if (index < lineIndex) {
+            return prev + curr.length + 1;
+          }
+          if (index === lineIndex) {
+            return selectionStart - prev;
+          }
+
+          return prev;
+        },
+        0
+      );
+      const totalCharOfLine = lines[lineIndex].length;
+
+      return {
+        lineIndex,
+        totalLines,
+        charIndex,
+        totalCharOfLine,
+        totalChars,
+      };
+    }
+  }
+
+  return {
+    lineIndex: 0,
+    totalLines: 0,
+    charIndex: 0,
+    totalCharOfLine: 0,
+    totalChars: 0,
+  };
+};
 /**
  *
  */
@@ -166,9 +234,9 @@ export default class BlockEvents extends Module {
   public handleCommandX(event: ClipboardEvent): void {
     const { BlockSelection, BlockManager, Caret } = this.Editor;
 
-    // if (!BlockSelection.anyBlockSelected) {
-    return;
-    // }
+    if (!BlockSelection.anyBlockSelected) {
+      return;
+    }
 
     BlockSelection.copySelectedBlocks(event).then(() => {
       const selectionPositionIndex = BlockManager.removeSelectedBlocks();

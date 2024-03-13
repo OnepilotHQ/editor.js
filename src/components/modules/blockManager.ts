@@ -329,9 +329,10 @@ export default class BlockManager extends Module {
    *
    * @param blocks - blocks to insert
    * @param index - index where to insert
+   * @param initial
    */
-  public insertMany(blocks: Block[], index = 0): void {
-    this._blocks.insertMany(blocks, index);
+  public insertMany(blocks: Block[], index = 0, initial = false): void {
+    this._blocks.insertMany(blocks, index, initial);
   }
 
   /**
