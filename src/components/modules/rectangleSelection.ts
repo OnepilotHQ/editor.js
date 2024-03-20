@@ -274,7 +274,7 @@ export default class RectangleSelection extends Module {
     this.inScrollZone = null;
 
     const rect = UI.nodes.holder.getBoundingClientRect();
-    const clientYFromTopOfEditor = clientY - rect.top; 
+    const clientYFromTopOfEditor = clientY - rect.top;
 
     if (clientYFromTopOfEditor <= this.HEIGHT_OF_SCROLL_ZONE) {
       this.inScrollZone = this.TOP_SCROLL_ZONE;
@@ -448,8 +448,7 @@ export default class RectangleSelection extends Module {
   private genInfoForMouseSelection(): {index: number; leftPos: number; rightPos: number} {
     const { UI } = this.Editor;
 
-    const widthOfRedactor = UI.nodes.holder.offsetWidth;
-    const centerOfRedactor = widthOfRedactor / 2;
+    const centerOfRedactor = UI.nodes.holder.offsetWidth;
     const Y = this.mouseY - window.pageYOffset;
     const elementUnderMouse = document.elementFromPoint(centerOfRedactor, Y);
     const blockInCurrentPos = this.Editor.BlockManager.getBlockByChildNode(elementUnderMouse);
