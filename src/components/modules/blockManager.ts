@@ -18,8 +18,8 @@ import { BlockAddedMutationType } from '../../../types/events/block/BlockAdded';
 import { BlockMovedMutationType } from '../../../types/events/block/BlockMoved';
 import { BlockChangedMutationType } from '../../../types/events/block/BlockChanged';
 import { BlockChanged } from '../events';
-import { clean } from '../utils/sanitizer';
-import { convertStringToBlockData } from '../utils/blocks';
+import { clean, sanitizeBlocks } from '../utils/sanitizer';
+import { convertStringToBlockData, isBlockConvertable } from '../utils/blocks';
 import PromiseQueue from '../utils/promise-queue';
 import { isString } from '../utils';
 
@@ -70,7 +70,7 @@ export default class BlockManager extends Module {
    *
    * @returns {Block}
    */
-  public get currentBlock(): Block {
+  public get currentBlock(): Block | undefined {
     return this._blocks[this.currentBlockIndex];
   }
 
@@ -473,29 +473,40 @@ export default class BlockManager extends Module {
    * @returns {Promise} - the sequence that can be continued
    */
   public async mergeBlocks(targetBlock: Block, blockToMerge: Block): Promise<void> {
-    const data = await blockToMerge.data;
+    let blockToMergeData: BlockToolData | undefined;
 
-    const getBlockToolData = async (): Promise<BlockToolData> => {
-      const importConfig = targetBlock.tool.conversionConfig.import;
-      const exportConfig = blockToMerge.tool.conversionConfig.export;
+    /**
+     * We can merge:
+     * 1) Blocks with the same Tool if tool provides merge method
+     */
+    if (targetBlock.name === blockToMerge.name && targetBlock.mergeable) {
+      const blockToMergeDataRaw = await blockToMerge.data;
 
-      if (isString(importConfig)) {
-        return {
-          [importConfig]: isString(exportConfig) ? data[exportConfig] : exportConfig(data),
-        };
+      if (_.isEmpty(blockToMergeDataRaw)) {
+        console.error('Could not merge Block. Failed to extract original Block data.');
+
+        return;
       }
 
-      return importConfig(await blockToMerge.exportDataAsString());
-    };
+      const [ cleanData ] = sanitizeBlocks([ blockToMergeDataRaw ], targetBlock.tool.sanitizeConfig);
 
-    const blockToMergeData = targetBlock.name !== blockToMerge.name
-      ? await getBlockToolData()
-      : data;
+      blockToMergeData = cleanData;
 
-    if (!_.isEmpty(blockToMergeData)) {
-      await targetBlock.mergeWith(blockToMergeData, targetBlock.name);
+    /**
+     * 2) Blocks with different Tools if they provides conversionConfig
+     */
+    } else if (targetBlock.mergeable && isBlockConvertable(blockToMerge, 'export') && isBlockConvertable(targetBlock, 'import')) {
+      const blockToMergeDataStringified = await blockToMerge.exportDataAsString();
+      const cleanData = clean(blockToMergeDataStringified, targetBlock.tool.sanitizeConfig);
+
+      blockToMergeData = convertStringToBlockData(cleanData, targetBlock.tool.conversionConfig);
     }
 
+    if (blockToMergeData === undefined) {
+      return;
+    }
+
+    await targetBlock.mergeWith(blockToMergeData);
     this.removeBlock(blockToMerge);
     this.currentBlockIndex = this._blocks.indexOf(targetBlock);
   }
@@ -572,14 +583,19 @@ export default class BlockManager extends Module {
     return firstSelectedBlockIndex;
   }
 
+  /**
+   * Check if a case element is selected
+   */
   public isCaseSelected(): boolean {
     return this.blocks.some(b => {
       return b.selected && b.tool.name === 'case';
     });
   }
 
-  public findLastBlockBeforeCase(): Block | undefined
-  {
+  /**
+   *
+   */
+  public findLastBlockBeforeCase(): Block | undefined {
     for (let index = this.blocks.length - 1; index >= 0; index--) {
       if (this.blocks[index].tool.name !== 'case') {
         return this.blocks[index];
