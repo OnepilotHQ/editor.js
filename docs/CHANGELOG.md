@@ -1,5 +1,10 @@
 # Changelog
 
+### 2.30.1
+
+– `Fix` – Block Tunes data are returned inside Block Mutations
+– `New` – Block Tunes now supports nesting items
+
 ### 2.30.0
 
 - `Improvement` — The ability to merge blocks of different types (if both tools provide the conversionConfig)
