@@ -1,3 +1,5 @@
+import { TooltipOptions } from 'codex-tooltip';
+
 /**
  * Common parameters for both types of popover items: with or without confirmation
  */
@@ -39,11 +41,20 @@ interface PopoverItemBase {
   name?: string;
 
   /**
-   * Defines whether item should toggle on click. 
-   * Can be represented as boolean value or a string key. 
+   * Defines whether item should toggle on click.
+   * Can be represented as boolean value or a string key.
    * In case of string, works like radio buttons group and highlights as inactive any other item that has same toggle key value.
    */
   toggle?: boolean | string;
+
+  /**
+   * Define some tooltips parameters
+   */
+  tooltip?: {
+    icon?: string;
+    text?: string;
+    options?: TooltipOptions;
+  }
 }
 
 /**

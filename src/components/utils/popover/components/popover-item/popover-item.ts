@@ -1,7 +1,8 @@
 import Dom from '../../../../dom';
-import { IconDotCircle, IconChevronRight } from '@codexteam/icons';
+import { IconDotCircle, IconChevronRight, IconQuestion } from '@codexteam/icons';
 import { PopoverItem as PopoverItemParams } from '../../../../../../types';
 import { css } from './popover-item.const';
+import Tooltip from 'codex-tooltip';
 
 /**
  * Represents sigle popover item node
@@ -181,6 +182,16 @@ export class PopoverItem {
       el.appendChild(Dom.make('div', [css.icon, css.iconChevronRight], {
         innerHTML: IconChevronRight,
       }));
+    }
+
+    if (params.tooltip) {
+      const tooltip = Dom.make('div', [ css.icon ], {
+        innerHTML: params.tooltip.icon ?? IconQuestion,
+      });
+
+      new Tooltip().onHover(tooltip, params.tooltip.text, params.tooltip.options);
+
+      el.appendChild(tooltip);
     }
 
     if (params.isActive) {
