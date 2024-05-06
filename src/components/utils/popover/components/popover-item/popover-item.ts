@@ -12,6 +12,7 @@ import Tooltip from 'codex-tooltip';
  * @todo split regular popover item and popover item with confirmation to separate classes
  */
 export class PopoverItem {
+  private tooltip: Tooltip;
   /**
    * True if item is disabled and hence not clickable
    */
@@ -151,6 +152,17 @@ export class PopoverItem {
   }
 
   /**
+   * Removed previously set tooltip
+   */
+  public destroy(): void {
+    this.tooltip.destroy();
+  }
+
+  /**
+   * Item html elements
+   */
+
+  /**
    * Constructs HTML element corresponding to popover item params
    *
    * @param params - item construction params
@@ -189,7 +201,9 @@ export class PopoverItem {
         innerHTML: params.tooltip.icon ?? IconQuestion,
       });
 
-      new Tooltip().onHover(tooltip, params.tooltip.text, params.tooltip.options);
+      this.tooltip = new Tooltip();
+
+      this.tooltip.onHover(tooltip, params.tooltip.text, params.tooltip.options);
 
       el.appendChild(tooltip);
     }

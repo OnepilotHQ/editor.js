@@ -135,6 +135,7 @@ export abstract class PopoverAbstract<Nodes extends PopoverNodes = PopoverNodes>
    * Clears memory
    */
   public destroy(): void {
+    this.items.forEach((item) => item.destroy());
     this.listeners.removeAll();
   }
 
