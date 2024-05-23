@@ -1,5 +1,6 @@
 import {BlockToolData} from '../tools';
 import { BlockId } from './block-id';
+import { BlockTuneData } from '../block-tunes/block-tune-data';
 
 /**
  * Tool's saved data
@@ -9,6 +10,7 @@ export interface SavedData {
   tool: string;
   data: BlockToolData;
   time: number;
+  tunes: { [name: string]: BlockTuneData }
 }
 
 /**
@@ -19,5 +21,6 @@ export interface ValidatedData {
   tool?: string;
   data?: BlockToolData;
   time?: number;
+  tunes?: { [name: string]: BlockTuneData },
   isValid: boolean;
 }

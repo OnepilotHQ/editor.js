@@ -299,7 +299,9 @@ export default class Caret extends Module {
     this.set(nodeToSet as HTMLElement, offset);
 
     BlockManager.setCurrentBlockByChildNode(block.holder);
-    BlockManager.currentBlock.currentInput = element;
+    if (BlockManager.currentBlock) {
+      BlockManager.currentBlock.currentInput = element;
+    }
   }
 
   /**
@@ -370,7 +372,7 @@ export default class Caret extends Module {
      */
     if (lastBlock.tool.isDefault && lastBlock.isEmpty) {
       this.setToBlock(lastBlock);
-    } else {
+    } else if (lastBlock.name !== 'case') {
       const newBlock = this.Editor.BlockManager.insertAtEnd();
 
       this.setToBlock(newBlock);

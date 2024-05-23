@@ -8,6 +8,74 @@ import Flipper from '../flipper';
 import type Block from '../block';
 import { areBlocksMergeable } from '../utils/blocks';
 
+
+const getSelection = (element: any) => {
+  let selectionStart;
+  let selectionEnd;
+  const isSupported = typeof window.getSelection !== 'undefined';
+
+  if (isSupported) {
+    const range = window.getSelection()?.getRangeAt(0);
+
+    if (range) {
+      const preSelectionRange = range.cloneRange();
+
+      preSelectionRange.selectNodeContents(element);
+      preSelectionRange.setEnd(range.startContainer, range.startOffset);
+      selectionStart = preSelectionRange.toString().length;
+      selectionEnd = selectionStart + range.toString().length;
+    }
+  }
+
+  return { selectionStart,
+    selectionEnd };
+};
+
+export const getCaretLineCharIndexesInElem = (elem: Element) => {
+  const { selectionStart } = getSelection(elem);
+
+  if (selectionStart) {
+    const contentText = elem.textContent;
+
+    if (contentText) {
+      const totalChars = contentText.length;
+      const lines = contentText.split('\n');
+      const totalLines = lines.length;
+      const lineIndex =
+        contentText.substr(0, selectionStart).split('\n').length - 1;
+      const charIndex = lines.reduce(
+        (prev: number, curr: string, index: number) => {
+          if (index < lineIndex) {
+            return prev + curr.length + 1;
+          }
+          if (index === lineIndex) {
+            return selectionStart - prev;
+          }
+
+          return prev;
+        },
+        0
+      );
+      const totalCharOfLine = lines[lineIndex].length;
+
+      return {
+        lineIndex,
+        totalLines,
+        charIndex,
+        totalCharOfLine,
+        totalChars,
+      };
+    }
+  }
+
+  return {
+    lineIndex: 0,
+    totalLines: 0,
+    charIndex: 0,
+    totalCharOfLine: 0,
+    totalChars: 0,
+  };
+};
 /**
  *
  */
@@ -59,18 +127,18 @@ export default class BlockEvents extends Module {
      *
      * @todo probably using "beforeInput" event would be better here
      */
-    if (event.key === '/' && !event.ctrlKey && !event.metaKey) {
-      this.slashPressed();
-    }
-
-    /**
-     * If user pressed "Ctrl + /" or "Cmd + /" — open Block Settings
-     * We check for "code" here since on different keyboard layouts there can be different keys in place of Slash.
-     */
-    if (event.code === 'Slash' && (event.ctrlKey || event.metaKey)) {
-      event.preventDefault();
-      this.commandSlashPressed();
-    }
+    // if (event.key === '/' && !event.ctrlKey && !event.metaKey) {
+    // this.slashPressed();
+    // }
+    //
+    // /!**
+    // If user pressed "Ctrl + /" or "Cmd + /" — open Block Settings
+    // We check for "code" here since on different keyboard layouts there can be different keys in place of Slash.
+    // !/
+    // if (event.code === 'Slash' && (event.ctrlKey || event.metaKey)) {
+    // event.preventDefault();
+    // this.commandSlashPressed();
+    // }
   }
 
   /**
@@ -177,9 +245,9 @@ export default class BlockEvents extends Module {
   public handleCommandX(event: ClipboardEvent): void {
     const { BlockSelection, BlockManager, Caret } = this.Editor;
 
-    if (!BlockSelection.anyBlockSelected) {
-      return;
-    }
+    // if (!BlockSelection.anyBlockSelected) {
+    return;
+    // }
 
     BlockSelection.copySelectedBlocks(event).then(() => {
       const selectionPositionIndex = BlockManager.removeSelectedBlocks();
@@ -262,6 +330,17 @@ export default class BlockEvents extends Module {
     const currentBlock = BlockManager.currentBlock;
 
     /**
+     * Don't handle Enter if the Emoji menu is open
+     */
+    const isMenuOpened = document.querySelector('.op-menu-container[data-show]');
+
+    if (isMenuOpened !== null) {
+      event.preventDefault();
+
+      return;
+    }
+
+    /**
      * Don't handle Enter keydowns when Tool sets enableLineBreaks to true.
      * Uses for Tools like <code> where line breaks should be handled by default behaviour.
      */
@@ -291,13 +370,6 @@ export default class BlockEvents extends Module {
      */
     if (this.Editor.Caret.isAtStart && !this.Editor.BlockManager.currentBlock.hasMedia) {
       this.Editor.BlockManager.insertDefaultBlockAtIndex(this.Editor.BlockManager.currentBlockIndex);
-
-    /**
-     * If caret is at very end of the block, just append the new block without splitting
-     * to prevent unnecessary dom mutation observing
-     */
-    } else if (this.Editor.Caret.isAtEnd) {
-      newCurrent = this.Editor.BlockManager.insertDefaultBlockAtIndex(this.Editor.BlockManager.currentBlockIndex + 1);
     } else {
       /**
        * Split the Current Block into two blocks
@@ -365,7 +437,7 @@ export default class BlockEvents extends Module {
     /**
      * If prev Block is empty, it should be removed just like a character
      */
-    if (previousBlock.isEmpty) {
+    if (previousBlock.isEmpty && previousBlock.tool.name !== 'case') {
       BlockManager.removeBlock(previousBlock);
 
       return;
@@ -505,6 +577,20 @@ export default class BlockEvents extends Module {
    * @param {KeyboardEvent} event - keyboard event
    */
   private arrowRightAndDown(event: KeyboardEvent): void {
+    const isMetaCombination = event.metaKey || event.ctrlKey;
+
+    if (isMetaCombination) {
+      return;
+    }
+
+    const isMenuOpened = document.querySelector('.op-menu-container[data-show]');
+
+    if (isMenuOpened !== null && event.keyCode === _.keyCodes.DOWN) {
+      event.preventDefault();
+
+      return;
+    }
+
     const isFlipperCombination = Flipper.usedKeys.includes(event.keyCode) &&
       (!event.shiftKey || event.keyCode === _.keyCodes.TAB);
 
@@ -564,6 +650,20 @@ export default class BlockEvents extends Module {
    * @param {KeyboardEvent} event - keyboard event
    */
   private arrowLeftAndUp(event: KeyboardEvent): void {
+    const isMetaCombination = event.metaKey || event.ctrlKey;
+
+    if (isMetaCombination) {
+      return;
+    }
+
+    const isMenuOpened = document.querySelector('.op-menu-container[data-show]');
+
+    if (isMenuOpened !== null && event.keyCode === _.keyCodes.UP) {
+      event.preventDefault();
+
+      return;
+    }
+
     /**
      * Arrows might be handled on toolbars by flipper
      * Check for Flipper.usedKeys to allow navigate by UP and disallow by LEFT

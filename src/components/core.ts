@@ -65,7 +65,9 @@ export default class Core {
           if ((this.configuration as EditorConfig).autofocus) {
             Caret.setToBlock(BlockManager.blocks[0], Caret.positions.START);
           }
-        } catch {}
+        } catch {
+          console.warn('Failed to focus editor');
+        }
 
         onReady();
       })

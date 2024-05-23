@@ -63,6 +63,14 @@ export default class MoveUpTune implements BlockTune {
       throw new Error('Unable to move Block up since it is already the first');
     }
 
+    if (
+      (currentBlock.name === 'case' && previousBlock.name !== 'case') ||
+      (currentBlock.name !== 'case' && previousBlock.name === 'case')
+    ) {
+      return;
+    }
+
+
     const currentBlockElement = currentBlock.holder;
     const previousBlockElement = previousBlock.holder;
 

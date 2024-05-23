@@ -515,11 +515,22 @@ export default class UI extends Module<UINodes> {
      * remove selected blocks
      */
     if (BlockSelection.anyBlockSelected && !Selection.isSelectionExists) {
+      const isCaseSelected = BlockManager.isCaseSelected();
+
       const selectionPositionIndex = BlockManager.removeSelectedBlocks();
 
-      const newBlock = BlockManager.insertDefaultBlockAtIndex(selectionPositionIndex, true);
+      if (isCaseSelected) {
+        const block = BlockManager.findLastBlockBeforeCase() ??
+          BlockManager.insertDefaultBlockAtIndex(0, true);
 
-      Caret.setToBlock(newBlock, Caret.positions.START);
+        Caret.setToBlock(block, Caret.positions.END);
+      }
+
+      if (!isCaseSelected) {
+        const newBlock = BlockManager.insertDefaultBlockAtIndex(selectionPositionIndex, true);
+
+        Caret.setToBlock(newBlock, Caret.positions.START);
+      }
 
       /** Clear selection */
       BlockSelection.clearSelection(event);
@@ -796,7 +807,7 @@ export default class UI extends Module<UINodes> {
        *   to prevent unnecessary tree-walking on Tools with many nodes (for ex. Table)
        * - Or, default-block is not empty
        */
-      if (!BlockManager.lastBlock.tool.isDefault || !BlockManager.lastBlock.isEmpty) {
+      if ((!BlockManager.lastBlock.tool.isDefault || !BlockManager.lastBlock.isEmpty) && BlockManager.lastBlock.name !== 'case') {
         BlockManager.insertAtEnd();
       }
 

@@ -278,9 +278,10 @@ export default class Toolbar extends Module<ToolbarNodes> {
     const { isMobile } = this.Editor.UI;
     const renderedContent = block.pluginsContent;
     const renderedContentStyle = window.getComputedStyle(renderedContent);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars,no-unused-vars
     const blockRenderedElementPaddingTop = parseInt(renderedContentStyle.paddingTop, 10);
+    const blockRenderedElementHeight = parseInt(renderedContentStyle.height, 10);
     const blockHeight = targetBlockHolder.offsetHeight;
-
     let toolbarY;
 
     /**
@@ -291,7 +292,8 @@ export default class Toolbar extends Module<ToolbarNodes> {
     if (isMobile) {
       toolbarY = targetBlockHolder.offsetTop + blockHeight;
     } else {
-      toolbarY = targetBlockHolder.offsetTop + blockRenderedElementPaddingTop;
+      // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+      toolbarY = targetBlockHolder.offsetTop + ((blockRenderedElementHeight / 2) - 13);
     }
 
     /**

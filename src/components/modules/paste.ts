@@ -867,13 +867,13 @@ export default class Paste extends Module {
    * @param {Array} blocks — Blocks' data to insert
    * @returns {void}
    */
-  private insertEditorJSData(blocks: Pick<SavedData, 'id' | 'data' | 'tool'>[]): void {
+  private insertEditorJSData(blocks: Omit<SavedData, 'time'>[]): void {
     const { BlockManager, Caret, Tools } = this.Editor;
     const sanitizedBlocks = sanitizeBlocks(blocks, (name) =>
       Tools.blockTools.get(name).sanitizeConfig
-    );
+    ) as Omit<SavedData, 'time'>[];
 
-    sanitizedBlocks.forEach(({ tool, data }, i) => {
+    sanitizedBlocks.forEach(({ tool, data, tunes }, i) => {
       let needToReplaceCurrentBlock = false;
 
       if (i === 0) {
@@ -886,6 +886,7 @@ export default class Paste extends Module {
         tool,
         data,
         replace: needToReplaceCurrentBlock,
+        tunes,
       });
 
       Caret.setToBlock(block, Caret.positions.END);

@@ -438,6 +438,7 @@ export default class Toolbox extends EventsDispatcher<ToolboxEventMap> {
       currentBlock.isEmpty
     );
 
+
     /**
      * Apply callback before inserting html
      */

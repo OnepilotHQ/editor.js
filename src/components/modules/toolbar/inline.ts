@@ -658,6 +658,9 @@ export default class InlineToolbar extends Module<InlineToolbarNodes> {
         }
 
         event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+
         this.toolClicked(tool);
       },
       on: this.Editor.UI.nodes.redactor,

@@ -243,8 +243,9 @@ export default class Blocks {
    *
    * @param blocks - blocks to insert
    * @param index - index to insert blocks at
+   * @param initial
    */
-  public insertMany(blocks: Block[], index: number ): void {
+  public insertMany(blocks: Block[], index: number, initial = false ): void {
     const fragment = new DocumentFragment();
 
     for (const block of blocks) {
@@ -273,7 +274,9 @@ export default class Blocks {
     /**
      * Call Rendered event for each block
      */
-    blocks.forEach((block) => block.call(BlockToolAPI.RENDERED));
+    if (!initial) {
+      blocks.forEach((block) => block.call(BlockToolAPI.RENDERED));
+    }
   }
 
   /**
