@@ -155,7 +155,7 @@ export class PopoverItem {
    * Removed previously set tooltip
    */
   public destroy(): void {
-    this.tooltip.destroy();
+    this.tooltip?.destroy();
   }
 
   /**
