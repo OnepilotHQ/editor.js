@@ -1,4 +1,4 @@
-import { PopoverItem as PopoverItemParams } from '../../../../types';
+import { PopoverItemParams } from '../../../../types';
 
 /**
  * Params required to render popover
@@ -14,16 +14,6 @@ export interface PopoverParams {
    * Depending on its size popover position will be calculated
    */
   scopeElement?: HTMLElement;
-
-  /**
-   * Arbitrary html element to be inserted before items list
-   */
-  customContent?: HTMLElement;
-
-  /**
-   * List of html elements inside custom content area that should be available for keyboard navigation
-   */
-  customContentFlippableItems?: HTMLElement[];
 
   /**
    * True if popover should contain search field
@@ -46,6 +36,7 @@ export interface PopoverParams {
   nestingLevel?: number;
 }
 
+
 /**
  * Texts used inside popover
  */
@@ -64,7 +55,12 @@ export enum PopoverEvent {
   /**
    * When popover closes
    */
-  Close = 'close'
+  Closed = 'closed',
+
+  /**
+   * When it closes because item with 'closeOnActivate' property set was clicked
+   */
+  ClosedOnActivate = 'closed-on-activate',
 }
 
 /**
@@ -74,7 +70,13 @@ export interface PopoverEventMap {
   /**
    * Fired when popover closes
    */
-  [PopoverEvent.Close]: undefined;
+  [PopoverEvent.Closed]: undefined;
+
+  /**
+   * Fired when popover closes because item with 'closeOnActivate' property set was clicked
+   * Value is the item that was clicked
+   */
+  [PopoverEvent.ClosedOnActivate]: undefined;
 }
 
 /**
@@ -92,9 +94,6 @@ export interface PopoverNodes {
 
   /** Popover items wrapper */
   items: HTMLElement;
-
-  /** Custom html content area */
-  customContent: HTMLElement | undefined;
 }
 
 /**

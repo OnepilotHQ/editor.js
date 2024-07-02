@@ -28,6 +28,7 @@ import {
   Tooltip,
   I18n,
   Ui,
+  Tools,
 } from './api';
 
 import { OutputData } from './data-formats';
@@ -77,10 +78,13 @@ export {
   Dictionary,
   DictValue,
   I18nConfig,
-  PopoverItem,
-  PopoverItemWithConfirmation,
-  PopoverItemWithoutConfirmation
 } from './configs';
+
+export {
+  PopoverItemParams,
+  PopoverItemDefaultParams,
+} from '../src/components/utils/popover';
+
 export { OutputData, OutputBlockData} from './data-formats/output-data';
 export { BlockId } from './data-formats/block-id';
 export { BlockAPI } from './api'
@@ -105,6 +109,7 @@ export {
 export interface API {
   blocks: Blocks;
   caret: Caret;
+  tools: Tools;
   events: Events;
   listeners: Listeners;
   notifier: Notifier;
