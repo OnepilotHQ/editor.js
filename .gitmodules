@@ -7,6 +7,12 @@
 [submodule "example/tools/list"]
 	path = example/tools/list
 	url = https://github.com/editor-js/list
+[submodule "example/tools/embed"]
+	path = example/tools/embed
+	url = https://github.com/editor-js/embed
+[submodule "example/tools/header"]
+	path = example/tools/header
+	url = https://github.com/editor-js/header
 [submodule "example/tools/quote"]
 	path = example/tools/quote
 	url = https://github.com/editor-js/quote
