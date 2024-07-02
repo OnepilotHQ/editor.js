@@ -1,3 +1,4 @@
+import Block from '../../src/components/block';
 import {OutputBlockData, OutputData} from '../data-formats/output-data';
 import {BlockToolData, ToolConfig} from '../tools';
 import {BlockAPI} from './block';
@@ -71,6 +72,13 @@ export interface Blocks {
    * Returns the index of Block by id;
    */
   getBlockIndex(blockId: string): number;
+
+  /**
+   * Get Block API object by html element
+   *
+   * @param element - html element to get Block by
+   */
+  getBlockByElement(element: HTMLElement): BlockAPI | undefined;
 
   /**
    * Mark Block as stretched
@@ -150,5 +158,5 @@ export interface Blocks {
    *
    * @throws Error if conversion is not possible
    */
-  convert(id: string, newType: string, dataOverrides?: BlockToolData): void;
+  convert(id: string, newType: string, dataOverrides?: BlockToolData): Promise<BlockAPI>;
 }

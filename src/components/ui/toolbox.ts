@@ -3,7 +3,7 @@ import { BlockToolAPI } from '../block';
 import Shortcuts from '../utils/shortcuts';
 import BlockTool from '../tools/block';
 import ToolsCollection from '../tools/collection';
-import { API, BlockToolData, ToolboxConfigEntry, PopoverItem, BlockAPI } from '../../../types';
+import { API, BlockToolData, ToolboxConfigEntry, PopoverItemParams, BlockAPI } from '../../../types';
 import EventsDispatcher from '../utils/events';
 import I18n from '../i18n';
 import { I18nInternalNS } from '../i18n/namespace-internal';
@@ -181,7 +181,7 @@ export default class Toolbox extends EventsDispatcher<ToolboxEventMap> {
     }
 
     this.removeAllShortcuts();
-    this.popover?.off(PopoverEvent.Close, this.onPopoverClose);
+    this.popover?.off(PopoverEvent.Closed, this.onPopoverClose);
     this.listeners.destroy();
     this.api.events.off(EditorMobileLayoutToggled, this.handleMobileLayoutToggle);
   }
@@ -253,7 +253,7 @@ export default class Toolbox extends EventsDispatcher<ToolboxEventMap> {
       items: this.toolboxItemsToBeDisplayed,
     });
 
-    this.popover.on(PopoverEvent.Close, this.onPopoverClose);
+    this.popover.on(PopoverEvent.Closed, this.onPopoverClose);
     this.nodes.toolbox?.append(this.popover.getElement());
   }
 
@@ -263,7 +263,7 @@ export default class Toolbox extends EventsDispatcher<ToolboxEventMap> {
   private destroyPopover(): void {
     if (this.popover !== null) {
       this.popover.hide();
-      this.popover.off(PopoverEvent.Close, this.onPopoverClose);
+      this.popover.off(PopoverEvent.Closed, this.onPopoverClose);
       this.popover.destroy();
       this.popover = null;
     }
@@ -303,11 +303,11 @@ export default class Toolbox extends EventsDispatcher<ToolboxEventMap> {
    * Returns list of items that will be displayed in toolbox
    */
   @_.cacheable
-  private get toolboxItemsToBeDisplayed(): PopoverItem[] {
+  private get toolboxItemsToBeDisplayed(): PopoverItemParams[] {
     /**
      * Maps tool data to popover item structure
      */
-    const toPopoverItem = (toolboxItem: ToolboxConfigEntry, tool: BlockTool): PopoverItem => {
+    const toPopoverItem = (toolboxItem: ToolboxConfigEntry, tool: BlockTool): PopoverItemParams => {
       return {
         icon: toolboxItem.icon,
         title: I18n.t(I18nInternalNS.toolNames, toolboxItem.title || _.capitalize(tool.name)),
@@ -320,7 +320,7 @@ export default class Toolbox extends EventsDispatcher<ToolboxEventMap> {
     };
 
     return this.toolsToBeDisplayed
-      .reduce<PopoverItem[]>((result, tool) => {
+      .reduce<PopoverItemParams[]>((result, tool) => {
         if (Array.isArray(tool.toolbox)) {
           tool.toolbox.forEach(item => {
             result.push(toPopoverItem(item, tool));
@@ -356,7 +356,7 @@ export default class Toolbox extends EventsDispatcher<ToolboxEventMap> {
     Shortcuts.add({
       name: shortcut,
       on: this.api.ui.nodes.redactor,
-      handler: (event: KeyboardEvent) => {
+      handler: async (event: KeyboardEvent) => {
         event.preventDefault();
 
         const currentBlockIndex = this.api.blocks.getCurrentBlockIndex();
@@ -368,11 +368,9 @@ export default class Toolbox extends EventsDispatcher<ToolboxEventMap> {
          */
         if (currentBlock) {
           try {
-            this.api.blocks.convert(currentBlock.id, toolName);
+            const newBlock = await this.api.blocks.convert(currentBlock.id, toolName);
 
-            window.requestAnimationFrame(() => {
-              this.api.caret.setToBlock(currentBlockIndex, 'end');
-            });
+            this.api.caret.setToBlock(newBlock, 'end');
 
             return;
           } catch (error) {}

@@ -1,4 +1,4 @@
-import { BlockAPI as BlockAPIInterface, Blocks } from '../../../../types/api';
+import type { BlockAPI as BlockAPIInterface, Blocks } from '../../../../types/api';
 import { BlockToolData, OutputBlockData, OutputData, ToolConfig } from '../../../../types';
 import * as _ from './../../utils';
 import BlockAPI from '../../block/api';
@@ -30,6 +30,7 @@ export default class BlocksAPI extends Module {
       getCurrentBlockIndex: (): number => this.getCurrentBlockIndex(),
       getBlockIndex: (id: string): number => this.getBlockIndex(id),
       getBlocksCount: (): number => this.getBlocksCount(),
+      getBlockByElement: (element: HTMLElement) => this.getBlockByElement(element),
       stretchBlock: (index: number, status = true): void => this.stretchBlock(index, status),
       insertNewBlock: (): void => this.insertNewBlock(),
       insert: this.insert,
@@ -104,6 +105,23 @@ export default class BlocksAPI extends Module {
       _.logLabeled('There is no block with id `' + id + '`', 'warn');
 
       return null;
+    }
+
+    return new BlockAPI(block);
+  }
+
+  /**
+   * Get Block API object by any child html element
+   *
+   * @param element - html element to get Block by
+   */
+  public getBlockByElement(element: HTMLElement): BlockAPIInterface | undefined {
+    const block = this.Editor.BlockManager.getBlock(element);
+
+    if (block === undefined) {
+      _.logLabeled('There is no block corresponding to element `' + element + '`', 'warn');
+
+      return;
     }
 
     return new BlockAPI(block);
@@ -331,7 +349,7 @@ export default class BlocksAPI extends Module {
    * @param dataOverrides - optional data overrides for the new block
    * @throws Error if conversion is not possible
    */
-  private convert = (id: string, newType: string, dataOverrides?: BlockToolData): void => {
+  private convert = async (id: string, newType: string, dataOverrides?: BlockToolData): Promise<BlockAPIInterface> => {
     const { BlockManager, Tools } = this.Editor;
     const blockToConvert = BlockManager.getBlockById(id);
 
@@ -350,7 +368,9 @@ export default class BlocksAPI extends Module {
     const targetBlockConvertable = targetBlockTool.conversionConfig?.import !== undefined;
 
     if (originalBlockConvertable && targetBlockConvertable) {
-      BlockManager.convert(blockToConvert, newType, dataOverrides);
+      const newBlock = await BlockManager.convert(blockToConvert, newType, dataOverrides);
+
+      return new BlockAPI(newBlock);
     } else {
       const unsupportedBlockTypes = [
         !originalBlockConvertable ? capitalize(blockToConvert.name) : false,

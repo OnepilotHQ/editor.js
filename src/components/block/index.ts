@@ -6,7 +6,7 @@ import {
   SanitizerConfig,
   ToolConfig,
   ToolboxConfigEntry,
-  PopoverItem
+  PopoverItemParams
 } from '../../../types';
 
 import { SavedData } from '../../../types/data-formats';
@@ -25,7 +25,8 @@ import { TunesMenuConfigItem } from '../../../types/tools';
 import { isMutationBelongsToElement } from '../utils/mutations';
 import { EditorEventMap, FakeCursorAboutToBeToggled, FakeCursorHaveBeenSet, RedactorDomChanged } from '../events';
 import { RedactorDomChangedPayload } from '../events/RedactorDomChanged';
-import { convertBlockDataToString } from '../utils/blocks';
+import { convertBlockDataToString, isSameBlockData } from '../utils/blocks';
+import { PopoverItemType } from '../utils/popover';
 
 /**
  * Interface describes Block class constructor argument
@@ -153,8 +154,6 @@ export default class Block extends EventsDispatcher<BlockEvents> {
 
   /**
    * Cached inputs
-   *
-   * @type {HTMLElement[]}
    */
   private cachedInputs: HTMLElement[] = [];
 
@@ -229,7 +228,6 @@ export default class Block extends EventsDispatcher<BlockEvents> {
     tunesData,
   }: BlockConstructorOptions, eventBus?: EventsDispatcher<EditorEventMap>) {
     super();
-
     this.name = tool.name;
     this.id = id;
     this.settings = tool.settings;
@@ -269,8 +267,6 @@ export default class Block extends EventsDispatcher<BlockEvents> {
 
   /**
    * Find and return all editable elements (contenteditable and native inputs) in the Tool HTML
-   *
-   * @returns {HTMLElement[]}
    */
   public get inputs(): HTMLElement[] {
     /**
@@ -299,19 +295,18 @@ export default class Block extends EventsDispatcher<BlockEvents> {
 
   /**
    * Return current Tool`s input
-   *
-   * @returns {HTMLElement}
+   * If Block doesn't contain inputs, return undefined
    */
-  public get currentInput(): HTMLElement | Node {
+  public get currentInput(): HTMLElement | undefined {
     return this.inputs[this.inputIndex];
   }
 
   /**
    * Set input index to the passed element
    *
-   * @param {HTMLElement | Node} element - HTML Element to set as current input
+   * @param element - HTML Element to set as current input
    */
-  public set currentInput(element: HTMLElement | Node) {
+  public set currentInput(element: HTMLElement) {
     const index = this.inputs.findIndex((input) => input === element || input.contains(element));
 
     if (index !== -1) {
@@ -321,19 +316,17 @@ export default class Block extends EventsDispatcher<BlockEvents> {
 
   /**
    * Return first Tool`s input
-   *
-   * @returns {HTMLElement}
+   * If Block doesn't contain inputs, return undefined
    */
-  public get firstInput(): HTMLElement {
+  public get firstInput(): HTMLElement | undefined {
     return this.inputs[0];
   }
 
   /**
    * Return first Tool`s input
-   *
-   * @returns {HTMLElement}
+   * If Block doesn't contain inputs, return undefined
    */
-  public get lastInput(): HTMLElement {
+  public get lastInput(): HTMLElement | undefined {
     const inputs = this.inputs;
 
     return inputs[inputs.length - 1];
@@ -341,19 +334,17 @@ export default class Block extends EventsDispatcher<BlockEvents> {
 
   /**
    * Return next Tool`s input or undefined if it doesn't exist
-   *
-   * @returns {HTMLElement}
+   * If Block doesn't contain inputs, return undefined
    */
-  public get nextInput(): HTMLElement {
+  public get nextInput(): HTMLElement | undefined {
     return this.inputs[this.inputIndex + 1];
   }
 
   /**
    * Return previous Tool`s input or undefined if it doesn't exist
-   *
-   * @returns {HTMLElement}
+   * If Block doesn't contain inputs, return undefined
    */
-  public get previousInput(): HTMLElement {
+  public get previousInput(): HTMLElement | undefined {
     return this.inputs[this.inputIndex - 1];
   }
 
@@ -597,15 +588,29 @@ export default class Block extends EventsDispatcher<BlockEvents> {
   }
 
   /**
-   * Returns data to render in tunes menu.
-   * Splits block tunes settings into 2 groups: popover items and custom html.
+   * Returns data to render in Block Tunes menu.
+   * Splits block tunes into 2 groups: block specific tunes and common tunes
    */
-  public getTunes(): [PopoverItem[], HTMLElement] {
-    const customHtmlTunesContainer = document.createElement('div');
-    const tunesItems: TunesMenuConfigItem[] = [];
+  public getTunes(): {
+    toolTunes: PopoverItemParams[];
+    commonTunes: PopoverItemParams[];
+    } {
+    const toolTunesPopoverParams: TunesMenuConfigItem[] = [];
+    const commonTunesPopoverParams: TunesMenuConfigItem[] = [];
 
     /** Tool's tunes: may be defined as return value of optional renderSettings method */
     const tunesDefinedInTool = typeof this.toolInstance.renderSettings === 'function' ? this.toolInstance.renderSettings() : [];
+
+    if ($.isElement(tunesDefinedInTool)) {
+      toolTunesPopoverParams.push({
+        type: PopoverItemType.Html,
+        element: tunesDefinedInTool,
+      });
+    } else if (Array.isArray(tunesDefinedInTool)) {
+      toolTunesPopoverParams.push(...tunesDefinedInTool);
+    } else {
+      toolTunesPopoverParams.push(tunesDefinedInTool);
+    }
 
     /** Common tunes: combination of default tunes (move up, move down, delete) and third-party tunes connected via tunes api */
     const commonTunes = [
@@ -613,17 +618,24 @@ export default class Block extends EventsDispatcher<BlockEvents> {
       ...this.defaultTunesInstances.values(),
     ].map(tuneInstance => tuneInstance.render());
 
-    [tunesDefinedInTool, commonTunes].flat().forEach(rendered => {
-      if ($.isElement(rendered)) {
-        customHtmlTunesContainer.appendChild(rendered);
-      } else if (Array.isArray(rendered)) {
-        tunesItems.push(...rendered);
+    /** Separate custom html from Popover items params for common tunes */
+    commonTunes.forEach(tuneConfig => {
+      if ($.isElement(tuneConfig)) {
+        commonTunesPopoverParams.push({
+          type: PopoverItemType.Html,
+          element: tuneConfig,
+        });
+      } else if (Array.isArray(tuneConfig)) {
+        commonTunesPopoverParams.push(...tuneConfig);
       } else {
-        tunesItems.push(rendered);
+        commonTunesPopoverParams.push(tuneConfig);
       }
     });
 
-    return [tunesItems, customHtmlTunesContainer];
+    return {
+      toolTunes: toolTunesPopoverParams,
+      commonTunes: commonTunesPopoverParams,
+    };
   }
 
   /**
@@ -697,11 +709,8 @@ export default class Block extends EventsDispatcher<BlockEvents> {
     const blockData = await this.data;
     const toolboxItems = toolboxSettings;
 
-    return toolboxItems.find((item) => {
-      return Object.entries(item.data)
-        .some(([propName, propValue]) => {
-          return blockData[propName] && _.equals(blockData[propName], propValue);
-        });
+    return toolboxItems?.find((item) => {
+      return isSameBlockData(item.data, blockData);
     });
   }
 

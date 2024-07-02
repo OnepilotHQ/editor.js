@@ -371,10 +371,10 @@ export default class BlockManager extends Module {
    * @param newTool - new Tool name
    * @param data - new Tool data
    */
-  public replace(block: Block, newTool: string, data: BlockToolData): void {
+  public replace(block: Block, newTool: string, data: BlockToolData): Block {
     const blockIndex = this.getBlockIndex(block);
 
-    this.insert({
+    return this.insert({
       tool: newTool,
       data,
       index: blockIndex,
@@ -843,7 +843,7 @@ export default class BlockManager extends Module {
    * @param targetToolName - name of the Tool to convert to
    * @param blockDataOverrides - optional new Block data overrides
    */
-  public async convert(blockToConvert: Block, targetToolName: string, blockDataOverrides?: BlockToolData): Promise<void> {
+  public async convert(blockToConvert: Block, targetToolName: string, blockDataOverrides?: BlockToolData): Promise<Block> {
     /**
      * At first, we get current Block data
      */
@@ -888,7 +888,7 @@ export default class BlockManager extends Module {
       newBlockData = Object.assign(newBlockData, blockDataOverrides);
     }
 
-    this.replace(blockToConvert, replacingTool.name, newBlockData);
+    return this.replace(blockToConvert, replacingTool.name, newBlockData);
   }
 
   /**

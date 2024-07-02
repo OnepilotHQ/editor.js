@@ -1,9 +1,6 @@
 [submodule "example/tools/inline-code"]
 	path = example/tools/inline-code
 	url = https://github.com/editor-js/inline-code
-[submodule "example/tools/header"]
-	path = example/tools/header
-	url = https://github.com/editor-js/header
 [submodule "example/tools/delimiter"]
 	path = example/tools/delimiter
 	url = https://github.com/editor-js/delimiter
@@ -25,9 +22,6 @@
 [submodule "example/tools/image"]
 	path = example/tools/image
 	url = https://github.com/editor-js/image
-[submodule "example/tools/embed"]
-	path = example/tools/embed
-	url = https://github.com/editor-js/embed
 [submodule "example/tools/table"]
 	path = example/tools/table
 	url = https://github.com/editor-js/table
