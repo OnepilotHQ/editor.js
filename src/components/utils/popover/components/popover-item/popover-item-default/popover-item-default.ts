@@ -1,10 +1,10 @@
 import Dom from '../../../../../dom';
 import { IconDotCircle, IconChevronRight } from '@codexteam/icons';
-import {
+import type {
   PopoverItemDefaultParams as PopoverItemDefaultParams,
   PopoverItemRenderParamsMap,
   PopoverItemType
-} from '../popover-item.types';
+} from '@/types/utils/popover/popover-item';
 import { PopoverItem } from '../popover-item';
 import { css } from './popover-item-default.const';
 
@@ -147,7 +147,9 @@ export class PopoverItemDefault extends PopoverItem {
    */
   private make(params: PopoverItemDefaultParams, renderParams?: PopoverItemRenderParamsMap[PopoverItemType.Default]): HTMLElement {
     const tag = renderParams?.wrapperTag || 'div';
-    const el = Dom.make(tag, css.container);
+    const el = Dom.make(tag, css.container, {
+      type: tag === 'button' ? 'button' : undefined,
+    });
 
     if (params.name) {
       el.dataset.itemName = params.name;

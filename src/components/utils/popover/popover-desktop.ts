@@ -1,10 +1,13 @@
 import Flipper from '../../flipper';
 import { PopoverAbstract } from './popover-abstract';
-import { PopoverItem, PopoverItemRenderParamsMap, PopoverItemSeparator, css as popoverItemCls } from './components/popover-item';
-import { PopoverEvent, PopoverParams } from './popover.types';
+import type { PopoverItem, PopoverItemRenderParamsMap } from './components/popover-item';
+import { PopoverItemSeparator, css as popoverItemCls } from './components/popover-item';
+import type { PopoverParams } from '@/types/utils/popover/popover';
+import { PopoverEvent } from '@/types/utils/popover/popover-event';
 import { keyCodes } from '../../utils';
 import { CSSVariables, css } from './popover.const';
-import { SearchInput, SearchInputEvent, SearchableItem } from './components/search-input';
+import type { SearchableItem } from './components/search-input';
+import { SearchInput, SearchInputEvent } from './components/search-input';
 import { cacheable } from '../../utils';
 import { PopoverItemDefault } from './components/popover-item';
 import { PopoverItemHtml } from './components/popover-item/popover-item-html/popover-item-html';
@@ -255,6 +258,7 @@ export class PopoverDesktop extends PopoverAbstract {
       items: item.children,
       nestingLevel: this.nestingLevel + 1,
       flippable: item.isChildrenFlippable,
+      messages: this.messages,
     });
 
     item.onChildrenOpen();
