@@ -3,12 +3,19 @@
 ### 2.31.0
 
 - `New` - Inline tools (those with `isReadOnlySupported` specified) can now be used in read-only mode
+- `New` - Inline tools (those with `isReadOnlySupported` specified) shortcuts now work in read-only mode
 - `Improvement` - Block manager passes target tool config to the `conversionConfig.import` method on conversion
 - `Fix` - Fix selection of first block in read-only initialization with "autofocus=true"
 - `Fix` - Incorrect caret position after blocks merging in Safari
 - `Fix` - Several toolbox items exported by the one tool have the same shortcut displayed in toolbox
 - `Improvement` - The current block reference will be updated in read-only mode when blocks are clicked
 - `Fix` - codex-notifier and codex-tooltip moved from devDependencies to dependencies in package.json to solve type errors
+- `Fix` - Handle whitespace input in empty placeholder elements to prevent caret from moving unexpectedly to the end of the placeholder
+- `Fix` - Fix the memory leak issue in `Shortcuts` class
+- `Fix` - Fix when / overides selected text outside of the editor
+- `DX` - Tools submodules removed from the repository
+- `Improvement` - Shift + Down/Up will allow to select next/previous line instead of Inline Toolbar flipping
+- `Improvement` - The API `caret.setToBlock()` offset now works across the entire block content, not just the first or last node.
 
 ### 2.30.7
 
