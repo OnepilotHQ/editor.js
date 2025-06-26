@@ -1,4 +1,5 @@
-import { PopoverItemParams } from '../../../../types';
+import { PopoverItemParams } from './popover-item';
+import { PopoverEvent } from './popover-event';
 
 /**
  * Params required to render popover
@@ -19,6 +20,12 @@ export interface PopoverParams {
    * True if popover should contain search field
    */
   searchable?: boolean;
+
+  /**
+   * False if keyboard navigation should be disabled.
+   * True by default
+   */
+  flippable?: boolean;
 
   /**
    * Popover texts overrides
@@ -48,20 +55,6 @@ export interface PopoverMessages {
   search?: string
 }
 
-/**
- * Event that can be triggered by the Popover
- */
-export enum PopoverEvent {
-  /**
-   * When popover closes
-   */
-  Closed = 'closed',
-
-  /**
-   * When it closes because item with 'closeOnActivate' property set was clicked
-   */
-  ClosedOnActivate = 'closed-on-activate',
-}
 
 /**
  * Events fired by the Popover

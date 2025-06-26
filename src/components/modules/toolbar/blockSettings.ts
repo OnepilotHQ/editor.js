@@ -1,14 +1,15 @@
 import Module from '../../__module';
 import $ from '../../dom';
 import SelectionUtils from '../../selection';
-import Block from '../../block';
+import type Block from '../../block';
 import I18n from '../../i18n';
 import { I18nInternalNS } from '../../i18n/namespace-internal';
-import Flipper from '../../flipper';
-import { MenuConfigItem } from '../../../../types/tools';
+import type Flipper from '../../flipper';
+import type { MenuConfigItem } from '../../../../types/tools';
 import { resolveAliases } from '../../utils/resolve-aliases';
-import { type Popover, PopoverDesktop, PopoverMobile, PopoverItemParams, PopoverItemType } from '../../utils/popover';
-import { PopoverEvent } from '../../utils/popover/popover.types';
+import type { PopoverItemParams } from '../../utils/popover';
+import { type Popover, PopoverDesktop, PopoverMobile, PopoverItemType } from '../../utils/popover';
+import { PopoverEvent } from '@/types/utils/popover/popover-event';
 import { isMobileScreen } from '../../utils';
 import { EditorMobileLayoutToggled } from '../../events';
 import { IconReplace } from '@codexteam/icons';
@@ -219,7 +220,7 @@ export default class BlockSettings extends Module<BlockSettingsNodes> {
       tool.toolbox.forEach((toolboxItem) => {
         result.push({
           icon: toolboxItem.icon,
-          title: toolboxItem.title,
+          title: I18n.t(I18nInternalNS.toolNames, toolboxItem.title),
           name: tool.name,
           closeOnActivate: true,
           onActivate: async () => {
@@ -240,6 +241,7 @@ export default class BlockSettings extends Module<BlockSettingsNodes> {
     if (convertToItems.length > 0) {
       items.push({
         icon: IconReplace,
+        name: 'convert-to',
         title: I18n.ui(I18nInternalNS.ui.popover, 'Convert to'),
         children: {
           searchable: true,

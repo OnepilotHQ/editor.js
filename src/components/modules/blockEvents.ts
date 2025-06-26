@@ -8,6 +8,7 @@ import Flipper from '../flipper';
 import type Block from '../block';
 import { areBlocksMergeable } from '../utils/blocks';
 import * as caretUtils from '../utils/caret';
+import { focus } from '@editorjs/caret';
 
 
 const getSelection = (element: any) => {
@@ -304,6 +305,12 @@ export default class BlockEvents extends Module {
    * @param event - keydown
    */
   private slashPressed(event: KeyboardEvent): void {
+    const wasEventTriggeredInsideEditor = this.Editor.UI.nodes.wrapper.contains(event.target as Node);
+
+    if (!wasEventTriggeredInsideEditor) {
+      return;
+    }
+
     const currentBlock = this.Editor.BlockManager.currentBlock;
     const canOpenToolbox = currentBlock.isEmpty;
 
@@ -585,15 +592,17 @@ export default class BlockEvents extends Module {
    * @param blockToMerge - what Block we want to merge
    */
   private mergeBlocks(targetBlock: Block, blockToMerge: Block): void {
-    const { BlockManager, Caret, Toolbar } = this.Editor;
+    const { BlockManager, Toolbar } = this.Editor;
 
-    Caret.createShadow(targetBlock.lastInput);
+    if (targetBlock.lastInput === undefined) {
+      return;
+    }
+
+    focus(targetBlock.lastInput, false);
 
     BlockManager
       .mergeBlocks(targetBlock, blockToMerge)
       .then(() => {
-        /** Restore caret position after merge */
-        Caret.restoreCaret(targetBlock.pluginsContent as HTMLElement);
         Toolbar.close();
       });
   }

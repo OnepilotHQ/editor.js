@@ -1,19 +1,15 @@
 import { isMobileScreen } from '../../utils';
-import { PopoverItem, PopoverItemDefault, PopoverItemType, WithChildren } from './components/popover-item';
+import type { PopoverItem } from './components/popover-item';
+import { PopoverItemDefault, PopoverItemType } from './components/popover-item';
 import { PopoverItemHtml } from './components/popover-item/popover-item-html/popover-item-html';
 import { PopoverDesktop } from './popover-desktop';
 import { CSSVariables, css } from './popover.const';
-import { PopoverParams } from './popover.types';
+import type { PopoverParams } from '@/types/utils/popover/popover';
 
 /**
  * Horizontal popover that is displayed inline with the content
  */
 export class PopoverInline extends PopoverDesktop {
-  /**
-   * Item nested popover is displayed for
-   */
-  private nestedPopoverTriggerItem: PopoverItemDefault | PopoverItemHtml | null = null;
-
   /**
    * Constructs the instance
    *
@@ -132,13 +128,13 @@ export class PopoverInline extends PopoverDesktop {
    */
   protected override showNestedItems(item: PopoverItemDefault | PopoverItemHtml): void {
     if (this.nestedPopoverTriggerItem === item) {
-      this.nestedPopoverTriggerItem = null;
       this.destroyNestedPopoverIfExists();
+
+      this.nestedPopoverTriggerItem = null;
 
       return;
     }
 
-    this.nestedPopoverTriggerItem = item;
     super.showNestedItems(item);
   }
 
@@ -148,7 +144,7 @@ export class PopoverInline extends PopoverDesktop {
    *
    * @param item - item to display nested popover by
    */
-  protected showNestedPopoverForItem(item: WithChildren<PopoverItemDefault> | WithChildren<PopoverItemHtml>): PopoverDesktop {
+  protected showNestedPopoverForItem(item: PopoverItem): PopoverDesktop {
     const nestedPopover = super.showNestedPopoverForItem(item);
     const nestedPopoverEl = nestedPopover.getElement();
 

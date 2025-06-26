@@ -1,10 +1,12 @@
 import { IconReplace } from '@codexteam/icons';
-import { InlineTool, API } from '../../../types';
-import { MenuConfig } from '../../../types/tools';
+import type { InlineTool, API } from '../../../types';
+import type { MenuConfig, MenuConfigItem } from '../../../types/tools';
 import * as _ from '../utils';
-import { Blocks, Selection, Tools, I18n, Caret } from '../../../types/api';
+import type { Blocks, Selection, Tools, Caret, I18n } from '../../../types/api';
 import SelectionUtils from '../selection';
 import { getConvertibleToolsForBlock } from '../utils/blocks';
+import I18nInternal from '../i18n';
+import { I18nInternalNS } from '../i18n/namespace-internal';
 
 /**
  * Inline tools for converting blocks
@@ -57,6 +59,11 @@ export default class ConvertInlineTool implements InlineTool {
   public async render(): Promise<MenuConfig> {
     const currentSelection = SelectionUtils.get();
     const currentBlock = this.blocksAPI.getBlockByElement(currentSelection.anchorNode as HTMLElement);
+
+    if (currentBlock === undefined) {
+      return [];
+    }
+
     const allBlockTools = this.toolsAPI.getBlockTools();
     const convertibleTools = await getConvertibleToolsForBlock(currentBlock, allBlockTools);
 
@@ -64,11 +71,11 @@ export default class ConvertInlineTool implements InlineTool {
       return [];
     }
 
-    const convertToItems = convertibleTools.reduce((result, tool) => {
-      tool.toolbox.forEach((toolboxItem) => {
+    const convertToItems = convertibleTools.reduce<MenuConfigItem[]>((result, tool) => {
+      tool.toolbox?.forEach((toolboxItem) => {
         result.push({
           icon: toolboxItem.icon,
-          title: toolboxItem.title,
+          title: I18nInternal.t(I18nInternalNS.toolNames, toolboxItem.title),
           name: tool.name,
           closeOnActivate: true,
           onActivate: async () => {

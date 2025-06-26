@@ -1,4 +1,3 @@
-import Block from '../../src/components/block';
 import {OutputBlockData, OutputData} from '../data-formats/output-data';
 import {BlockToolData, ToolConfig} from '../tools';
 import {BlockAPI} from './block';
@@ -145,9 +144,10 @@ export interface Blocks {
    * Updates block data by id
    *
    * @param id - id of the block to update
-   * @param data - the new data. Can be partial.
+   * @param data - (optional) the new data. Can be partial.
+   * @param tunes - (optional) tune data
    */
-  update(id: string, data: Partial<BlockToolData>): Promise<BlockAPI>;
+  update(id: string, data?: Partial<BlockToolData>, tunes?: {[name: string]: BlockTuneData}): Promise<BlockAPI>;
 
   /**
    * Converts block to another type. Both blocks should provide the conversionConfig.

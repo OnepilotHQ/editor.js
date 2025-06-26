@@ -1,10 +1,13 @@
 import Flipper from '../../flipper';
 import { PopoverAbstract } from './popover-abstract';
-import { PopoverItem, PopoverItemRenderParamsMap, PopoverItemSeparator, WithChildren, css as popoverItemCls } from './components/popover-item';
-import { PopoverEvent, PopoverParams } from './popover.types';
+import type { PopoverItem, PopoverItemRenderParamsMap } from './components/popover-item';
+import { PopoverItemSeparator, css as popoverItemCls } from './components/popover-item';
+import type { PopoverParams } from '@/types/utils/popover/popover';
+import { PopoverEvent } from '@/types/utils/popover/popover-event';
 import { keyCodes } from '../../utils';
 import { CSSVariables, css } from './popover.const';
-import { SearchInput, SearchInputEvent, SearchableItem } from './components/search-input';
+import type { SearchableItem } from './components/search-input';
+import { SearchInput, SearchInputEvent } from './components/search-input';
 import { cacheable } from '../../utils';
 import { PopoverItemDefault } from './components/popover-item';
 import { PopoverItemHtml } from './components/popover-item/popover-item-html/popover-item-html';
@@ -19,7 +22,7 @@ export class PopoverDesktop extends PopoverAbstract {
   /**
    * Flipper - module for keyboard iteration between elements
    */
-  public flipper: Flipper;
+  public flipper: Flipper | undefined;
 
   /**
    * Popover nesting level. 0 value means that it is a root popover
@@ -31,6 +34,11 @@ export class PopoverDesktop extends PopoverAbstract {
    * Undefined by default, PopoverDesktop when exists and null after destroyed.
    */
   protected nestedPopover: PopoverDesktop | undefined | null;
+
+  /**
+   * Item nested popover is displayed for
+   */
+  protected nestedPopoverTriggerItem: PopoverItem | null = null;
 
   /**
    * Last hovered item inside popover.
@@ -75,18 +83,20 @@ export class PopoverDesktop extends PopoverAbstract {
       this.addSearch();
     }
 
-    this.flipper = new Flipper({
-      items: this.flippableElements,
-      focusedItemClass: popoverItemCls.focused,
-      allowedKeys: [
-        keyCodes.TAB,
-        keyCodes.UP,
-        keyCodes.DOWN,
-        keyCodes.ENTER,
-      ],
-    });
+    if (params.flippable !== false) {
+      this.flipper = new Flipper({
+        items: this.flippableElements,
+        focusedItemClass: popoverItemCls.focused,
+        allowedKeys: [
+          keyCodes.TAB,
+          keyCodes.UP,
+          keyCodes.DOWN,
+          keyCodes.ENTER,
+        ],
+      });
 
-    this.flipper.onFlip(this.onFlip);
+      this.flipper.onFlip(this.onFlip);
+    }
   }
 
   /**
@@ -137,7 +147,7 @@ export class PopoverDesktop extends PopoverAbstract {
     }
 
     super.show();
-    this.flipper.activate(this.flippableElements);
+    this.flipper?.activate(this.flippableElements);
   }
 
   /**
@@ -148,7 +158,7 @@ export class PopoverDesktop extends PopoverAbstract {
 
     this.destroyNestedPopoverIfExists();
 
-    this.flipper.deactivate();
+    this.flipper?.deactivate();
 
     this.previouslyHoveredItem = null;
   };
@@ -166,10 +176,13 @@ export class PopoverDesktop extends PopoverAbstract {
    *
    * @param item – item to show nested popover for
    */
-  protected override showNestedItems(item: WithChildren<PopoverItemDefault> | WithChildren<PopoverItemHtml>): void {
+  protected override showNestedItems(item: PopoverItem): void {
     if (this.nestedPopover !== null && this.nestedPopover !== undefined) {
       return;
     }
+
+    this.nestedPopoverTriggerItem = item;
+
     this.showNestedPopoverForItem(item);
   }
 
@@ -207,7 +220,7 @@ export class PopoverDesktop extends PopoverAbstract {
    * @param nestedPopoverEl - nested popover element
    * @param item – item near which nested popover should be displayed
    */
-  protected setTriggerItemPosition(nestedPopoverEl: HTMLElement, item: WithChildren<PopoverItemDefault> | WithChildren<PopoverItemHtml>): void {
+  protected setTriggerItemPosition(nestedPopoverEl: HTMLElement, item: PopoverItem): void {
     const itemEl = item.getElement();
     const itemOffsetTop = (itemEl ? itemEl.offsetTop : 0) - this.scrollTop;
     const topOffset = this.offsetTop + itemOffsetTop;
@@ -228,9 +241,9 @@ export class PopoverDesktop extends PopoverAbstract {
     this.nestedPopover.destroy();
     this.nestedPopover.getElement().remove();
     this.nestedPopover = null;
-    this.flipper.activate(this.flippableElements);
+    this.flipper?.activate(this.flippableElements);
 
-    this.items.forEach(item => item.onChildrenClose());
+    this.nestedPopoverTriggerItem?.onChildrenClose();
   }
 
   /**
@@ -239,11 +252,13 @@ export class PopoverDesktop extends PopoverAbstract {
    *
    * @param item - item to display nested popover by
    */
-  protected showNestedPopoverForItem(item: WithChildren<PopoverItemDefault> | WithChildren<PopoverItemHtml>): PopoverDesktop {
+  protected showNestedPopoverForItem(item: PopoverItem): PopoverDesktop {
     this.nestedPopover = new PopoverDesktop({
       searchable: item.isChildrenSearchable,
       items: item.children,
       nestingLevel: this.nestingLevel + 1,
+      flippable: item.isChildrenFlippable,
+      messages: this.messages,
     });
 
     item.onChildrenOpen();
@@ -264,7 +279,7 @@ export class PopoverDesktop extends PopoverAbstract {
     nestedPopoverEl.style.setProperty(CSSVariables.NestingLevel, this.nestedPopover.nestingLevel.toString());
 
     this.nestedPopover.show();
-    this.flipper.deactivate();
+    this.flipper?.deactivate();
 
     return this.nestedPopover;
   }
@@ -414,7 +429,7 @@ export class PopoverDesktop extends PopoverAbstract {
     /** List of elements available for keyboard navigation considering search query applied */
     const flippableElements = data.query === '' ? this.flippableElements : data.items.map(item => (item as PopoverItem).getElement());
 
-    if (this.flipper.isActivated) {
+    if (this.flipper?.isActivated) {
       /** Update flipper items with only visible */
       this.flipper.deactivate();
       this.flipper.activate(flippableElements as HTMLElement[]);

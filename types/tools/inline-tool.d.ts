@@ -13,10 +13,10 @@ export interface InlineTool extends BaseTool<HTMLElement | MenuConfig> {
 
   /**
    * Method that accepts selected range and wrap it somehow
-   * @param {Range} range - selection's range
+   * @param range - selection's range. If no active selection, range is null
    * @deprecated use {@link MenuConfig} item onActivate property instead
    */
-  surround?(range: Range): void;
+  surround?(range: Range | null): void;
 
   /**
    * Get SelectionUtils and detect if Tool was applied
@@ -57,4 +57,10 @@ export interface InlineToolConstructable extends BaseToolConstructable {
    * @param {InlineToolConstructorOptions} config - constructor parameters
    */
   new(config: InlineToolConstructorOptions): BaseTool;
+
+  /**
+   * Allows inline tool to be available in read-only mode
+   * Can be used, for example, by comments tool
+   */
+  isReadOnlySupported?: boolean;
 }
