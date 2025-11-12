@@ -165,6 +165,8 @@ export default class BlockEvents extends Module {
       return;
     }
 
+    event.stopPropagation();
+
     // Copy Selected Blocks
     BlockSelection.copySelectedBlocks(event);
   }
@@ -180,6 +182,8 @@ export default class BlockEvents extends Module {
     if (!BlockSelection.anyBlockSelected) {
       return;
     }
+
+    event.stopPropagation();
 
     BlockSelection.copySelectedBlocks(event).then(() => {
       const selectionPositionIndex = BlockManager.removeSelectedBlocks();
