@@ -17,6 +17,11 @@ export interface EditorConfig {
   holder?: string | HTMLElement;
 
   /**
+   * Element where Editor will be appended
+   */
+  holderParent: HTMLElement;
+
+  /**
    * If true, set caret at the first Block after Editor is ready
    */
   autofocus?: boolean;

@@ -45,7 +45,7 @@ export default class RectangleSelection extends Module {
   /**
    *  Height of scroll zone on boundary of screen
    */
-  private readonly HEIGHT_OF_SCROLL_ZONE = 80;
+  private readonly HEIGHT_OF_SCROLL_ZONE = 100;
 
   /**
    *  Scroll zone type indicators
@@ -186,18 +186,18 @@ export default class RectangleSelection extends Module {
       this.processMouseDown(mouseEvent);
     }, false);
 
-    this.listeners.on(UI.nodes.holder, 'mousemove', _.throttle((mouseEvent: MouseEvent) => {
+    this.listeners.on(UI.nodes.holderParent, 'mousemove', _.throttle((mouseEvent: MouseEvent) => {
       this.processMouseMove(mouseEvent);
     // eslint-disable-next-line @typescript-eslint/no-magic-numbers
     }, 10), {
       passive: true,
     });
 
-    this.listeners.on(UI.nodes.holder, 'mouseleave', () => {
+    this.listeners.on(UI.nodes.holderParent, 'mouseleave', () => {
       this.processMouseLeave();
     });
 
-    this.listeners.on(UI.nodes.holder, 'scroll', _.throttle((mouseEvent: MouseEvent) => {
+    this.listeners.on(UI.nodes.holderParent, 'scroll', _.throttle((mouseEvent: MouseEvent) => {
       this.processScroll(mouseEvent);
     // eslint-disable-next-line @typescript-eslint/no-magic-numbers
     }, 10), {
@@ -268,12 +268,12 @@ export default class RectangleSelection extends Module {
    *
    * @param {number} clientY - Y coord of mouse
    */
-  private scrollByZones(clientY): void {
+  private scrollByZones(clientY: number): void {
     const { UI } = this.Editor;
 
     this.inScrollZone = null;
 
-    const rect = UI.nodes.holder.getBoundingClientRect();
+    const rect = UI.nodes.holderParent.getBoundingClientRect();
     const clientYFromTopOfEditor = clientY - rect.top;
 
     if (clientYFromTopOfEditor <= this.HEIGHT_OF_SCROLL_ZONE) {
@@ -332,7 +332,7 @@ export default class RectangleSelection extends Module {
     const { UI } = this.Editor;
     const lastOffset = window.pageYOffset;
 
-    UI.nodes.holder.scrollBy(0, speed);
+    UI.nodes.holderParent.scrollBy(0, speed);
     this.mouseY += window.pageYOffset - lastOffset;
     setTimeout(() => {
       this.scrollVertical(speed);

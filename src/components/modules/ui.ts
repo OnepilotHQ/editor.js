@@ -22,6 +22,7 @@ import { EditorMobileLayoutToggled } from '../events';
  */
 interface UINodes {
   holder: HTMLElement;
+  holderParent: HTMLElement;
   wrapper: HTMLElement;
   redactor: HTMLElement;
 }
@@ -280,6 +281,7 @@ export default class UI extends Module<UINodes> {
      * @type {Element}
      */
     this.nodes.holder = $.getHolder(this.config.holder);
+    this.nodes.holderParent = this.config.holderParent ?? this.nodes.holder.parentElement;
 
     /**
      * Create and save main UI elements
@@ -545,23 +547,11 @@ export default class UI extends Module<UINodes> {
      * remove selected blocks
      */
     if (BlockSelection.anyBlockSelected && !Selection.isSelectionExists) {
-      const isCaseSelected = BlockManager.isCaseSelected();
+      const selectionPositionIndex = BlockManager.removeSelectedBlocks() as number;
 
-      const selectionPositionIndex = BlockManager.removeSelectedBlocks();
+      const newBlock = BlockManager.insertDefaultBlockAtIndex(selectionPositionIndex, true);
 
-      if (isCaseSelected) {
-        const block = BlockManager.findLastBlockBeforeCase() ??
-          BlockManager.insertDefaultBlockAtIndex(0, true);
-
-        Caret.setToBlock(block, Caret.positions.END);
-      }
-
-      if (!isCaseSelected) {
-        const newBlock = BlockManager.insertDefaultBlockAtIndex(selectionPositionIndex, true);
-
-        Caret.setToBlock(newBlock, Caret.positions.START);
-      }
-
+      Caret.setToBlock(newBlock, Caret.positions.START);
       /** Clear selection */
       BlockSelection.clearSelection(event);
 
@@ -837,7 +827,7 @@ export default class UI extends Module<UINodes> {
        *   to prevent unnecessary tree-walking on Tools with many nodes (for ex. Table)
        * - Or, default-block is not empty
        */
-      if ((!BlockManager.lastBlock.tool.isDefault || !BlockManager.lastBlock.isEmpty) && BlockManager.lastBlock.name !== 'case') {
+      if (!BlockManager.lastBlock.tool.isDefault || !BlockManager.lastBlock.isEmpty) {
         BlockManager.insertAtEnd();
       }
 

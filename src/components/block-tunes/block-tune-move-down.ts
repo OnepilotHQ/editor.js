@@ -61,14 +61,6 @@ export default class MoveDownTune implements BlockTune {
     const currentBlock = this.api.blocks.getBlockByIndex(currentBlockIndex);
     const nextBlock = this.api.blocks.getBlockByIndex(currentBlockIndex + 1);
 
-    if (
-      (currentBlock.name === 'case' && nextBlock.name !== 'case') ||
-      (currentBlock.name !== 'case' && nextBlock.name === 'case')
-    ) {
-      return;
-    }
-
-
     // If Block is last do nothing
     if (!nextBlock) {
       throw new Error('Unable to move Block down since it is already the last');
